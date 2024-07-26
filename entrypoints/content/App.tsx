@@ -3,7 +3,7 @@ import "../../assets/main.css";
 import { Button } from "@/components/ui/button";
 import Youtube from "./strategies/youtube";
 import Medium from "./strategies/medium";
-import General from "./strategies/general";
+import Generic from "./strategies/generic";
 import { MessageType } from "../types";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch";
@@ -52,7 +52,7 @@ export default () => {
     return (
       <div>
         <p>{url}</p>
-        <General />
+        <Generic tabUrl={url} />
         <p>This is React. {count}</p>
         <Button onClick={increment}>Increment</Button>
       </div>

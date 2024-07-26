@@ -2,26 +2,26 @@
 
 function rem2px(input, fontSize = 16) {
   if (input == null) {
-      return input;
+    return input;
   }
   switch (typeof input) {
-      case "object":
-          if (Array.isArray(input)) {
-              return input.map((val) => rem2px(val, fontSize));
-          } else {
-              const ret = {};
-              for (const key in input) {
-                  ret[key] = rem2px(input[key]);
-              }
-              return ret;
-          }
-      case "string":
-          return input.replace(
-              /(\d*\.?\d+)rem$/,
-              (_, val) => parseFloat(val) * fontSize + "px"
-          );
-      default:
-          return input;
+    case "object":
+      if (Array.isArray(input)) {
+        return input.map((val) => rem2px(val, fontSize));
+      } else {
+        const ret = {};
+        for (const key in input) {
+          ret[key] = rem2px(input[key]);
+        }
+        return ret;
+      }
+    case "string":
+      return input.replace(
+        /(\d*\.?\d+)rem$/,
+        (_, val) => parseFloat(val) * fontSize + "px"
+      );
+    default:
+      return input;
   }
 }
 
@@ -29,10 +29,8 @@ module.exports = {
   darkMode: ["class"],
   important: true,
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./entrypoints/**/*.{html,ts,tsx}",
+    "./components/**/*.{html,ts,tsx}",
   ],
   prefix: "fp-",
   theme: {
@@ -101,4 +99,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+};
