@@ -33,7 +33,6 @@ export default function useTrackInteractions(tabUrl: string) {
   );
 
   const urlRef = useRef(tabUrl);
-  console.log("urlRef", urlRef.current);
   const startTime = useRef(Date.now());
   const totalTimeSpent = useRef(0);
   const isActive = useRef(true);

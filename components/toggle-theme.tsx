@@ -9,7 +9,6 @@ export default function ToggleThemeButton() {
     const newTheme = theme === "light" ? "dark" : "light";
     toggleTheme(newTheme);
     const element = document.querySelector("wxt-react-example");
-    console.log(element);
     if (element) {
       const shadowRoot = element.shadowRoot;
       if (shadowRoot) {
