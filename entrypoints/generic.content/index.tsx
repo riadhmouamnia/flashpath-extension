@@ -1,6 +1,9 @@
 import "../style.css";
+import "../../assets/main.css";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
+import { ThemeProvider } from "@/components/theme-provider.tsx";
+import Header from "@/components/header.tsx";
 
 export default defineContentScript({
   matches: ["<all_urls>"],
@@ -19,7 +22,12 @@ export default defineContentScript({
         container.append(wrapper);
 
         const root = ReactDOM.createRoot(wrapper);
-        root.render(<App />);
+        root.render(
+          <ThemeProvider>
+            <Header />
+            <App />
+          </ThemeProvider>
+        );
         return { root, wrapper };
       },
       onRemove: (elements) => {

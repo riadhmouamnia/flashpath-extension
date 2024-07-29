@@ -1,5 +1,5 @@
 import { browser } from "wxt/browser";
-import { MessageType } from "./types";
+import ExtMessage, { MessageType } from "./types";
 
 const CHROME_STORE_URL = "https://chromewebstore.google.com/";
 const CHROME_EXTENSIONS_URL = "chrome://extensions/";
@@ -71,4 +71,24 @@ export default defineBackground(() => {
       }
     });
   });
+
+  browser.runtime.onMessage.addListener(
+    async (
+      message: ExtMessage,
+      sender,
+      sendResponse: (message: any) => void
+    ) => {
+      console.log("background:");
+      console.log(message);
+      if (message.messageType === MessageType.CHANGE_THEME) {
+        let tabs = await browser.tabs.query({});
+        console.log(`tabs:${tabs.length}`);
+        if (tabs) {
+          for (const tab of tabs) {
+            await browser.tabs.sendMessage(tab.id!, message);
+          }
+        }
+      }
+    }
+  );
 });
