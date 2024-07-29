@@ -1,6 +1,7 @@
 import { CiDark, CiLight } from "react-icons/ci";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "./ui/button";
+import { MessageType } from "@/entrypoints/types";
 
 export default function ToggleThemeButton() {
   const { theme, toggleTheme } = useTheme();
@@ -18,10 +19,16 @@ export default function ToggleThemeButton() {
         }
       }
     }
+    toggleTheme(theme);
+    await browser.runtime.sendMessage({
+      messageType: MessageType.CHANGE_THEME,
+      content: newTheme,
+    });
     await browser.storage.local.set({
       theme: newTheme,
     });
   };
+
   return (
     <Button onClick={handleToggleTheme} size="icon" variant="ghost">
       {theme === "light" ? (

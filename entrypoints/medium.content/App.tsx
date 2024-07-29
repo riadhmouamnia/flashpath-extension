@@ -3,11 +3,13 @@ import "../../assets/main.css";
 import { Button } from "@/components/ui/button";
 import { MessageType } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
+import { useTheme } from "@/components/theme-provider";
 
 export default () => {
   const [count, setCount] = useState(1);
   const increment = () => setCount((count) => count + 1);
   const [url, setUrl] = useState(window.location.href);
+  const { toggleTheme } = useTheme();
 
   useEffect(() => {
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -19,6 +21,19 @@ export default () => {
       } else if (message.messageType == MessageType.URL_CHANGE) {
         const url = message.data.url;
         setUrl(url);
+      } else if (message.messageType == MessageType.CHANGE_THEME) {
+        const newTheme = message.content;
+        toggleTheme(newTheme);
+        const element = document.querySelector("wxt-react-example");
+        if (element) {
+          const shadowRoot = element.shadowRoot;
+          if (shadowRoot) {
+            const body = shadowRoot.querySelector("body");
+            if (body) {
+              body.className = newTheme;
+            }
+          }
+        }
       }
     });
   }, []);
