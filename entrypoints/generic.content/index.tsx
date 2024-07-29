@@ -1,9 +1,10 @@
-import "./style.css";
+import "../style.css";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 
 export default defineContentScript({
   matches: ["<all_urls>"],
+  excludeMatches: ["*://www.youtube.com/*", "*://medium.com/*"],
   cssInjectionMode: "ui",
 
   async main(ctx) {

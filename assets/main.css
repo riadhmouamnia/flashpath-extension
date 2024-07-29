@@ -59,11 +59,17 @@
   }
 }
 
-@layer base {
+/* @layer base {
   * {
     @apply fp-border-border;
   }
   body {
     @apply fp-bg-background fp-text-foreground;
+  }
+} */
+
+@layer base {
+  #json-tree > ul {
+    @apply fp-m-0 fp-p-4 fp-text-xs !important;
   }
 }
