@@ -1,35 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card } from "@/components/ui/card";
 import {
   MediaEventType,
   MessageType,
   UrlInteractionsState,
 } from "@/entrypoints/types";
-// import { formatTimeSpent } from "@/lib/utils";
+import { loadFromLocalStorage, saveToLocalStorage } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
-import { JSONTree } from "react-json-tree";
-
-const theme = {
-  scheme: "monokai",
-  author: "wimer hazenberg (http://www.monokai.nl)",
-  base00: "#272822",
-  base01: "#383830",
-  base02: "#49483e",
-  base03: "#75715e",
-  base04: "#a59f85",
-  base05: "#f8f8f2",
-  base06: "#f5f4f1",
-  base07: "#f9f8f5",
-  base08: "#f92672",
-  base09: "#fd971f",
-  base0A: "#f4bf75",
-  base0B: "#a6e22e",
-  base0C: "#a1efe4",
-  base0D: "#66d9ef",
-  base0E: "#ae81ff",
-  base0F: "#cc6633",
-};
 
 const initializeUrlState = () => ({
   totalTimeSpent: 0,
@@ -45,32 +22,18 @@ const initializeUrlState = () => ({
   Keystrokes: [],
 });
 
-// const saveToLocalStorage = (data: UrlInteractionsState) => {
-//   localStorage.setItem("urlInteractions", JSON.stringify(data));
-// };
-
-// const loadFromLocalStorage = () => {
-//   const data = localStorage.getItem("urlInteractions");
-//   return data ? JSON.parse(data) : {};
-// };
-
-// const clearLocalStorage = () => {
-//   localStorage.removeItem("urlInteractions");
-// };
-
-// clearLocalStorage();
-export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
+export default function useTrackInteractions(tabUrl: string) {
   const [urlInteractions, setUrlInteractions] = useState<UrlInteractionsState>(
     () => {
-      // const savedState = loadFromLocalStorage();
-      // const currentUrl = window.location.href;
-      // return savedState[tabUrl] ? savedState : initializeUrlState();
-      return {
-        [tabUrl]: initializeUrlState(),
-      };
+      const savedState = loadFromLocalStorage("urlInteractions");
+      return savedState[tabUrl]
+        ? savedState
+        : { [tabUrl]: initializeUrlState() };
     }
   );
 
+  const urlRef = useRef(tabUrl);
+  console.log("urlRef", urlRef.current);
   const startTime = useRef(Date.now());
   const totalTimeSpent = useRef(0);
   const isActive = useRef(true);
@@ -91,7 +54,10 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
             totalTimeSpent: totalTimeSpent.current,
           },
         };
-        // saveToLocalStorage(updatedInteractions);
+        saveToLocalStorage({
+          key: "urlInteractions",
+          value: updatedInteractions,
+        });
         return updatedInteractions;
       });
     } else {
@@ -114,7 +80,10 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
             totalTimeSpent: totalTimeSpent.current,
           },
         };
-        // saveToLocalStorage(updatedInteractions);
+        saveToLocalStorage({
+          key: "urlInteractions",
+          value: updatedInteractions,
+        });
         return updatedInteractions;
       });
     }
@@ -135,7 +104,10 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
             reloadCount: prev[window.location.href].reloadCount + 1 || 0,
           },
         };
-        // saveToLocalStorage(updatedInteractions);
+        saveToLocalStorage({
+          key: "urlInteractions",
+          value: updatedInteractions,
+        });
         return updatedInteractions;
       });
     }
@@ -151,7 +123,10 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
             hasScrolledFullPage: true,
           },
         };
-        // saveToLocalStorage(updatedInteractions);
+        saveToLocalStorage({
+          key: "urlInteractions",
+          value: updatedInteractions,
+        });
         return updatedInteractions;
       });
     }
@@ -170,7 +145,10 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
           ],
         },
       };
-      // saveToLocalStorage(updatedInteractions);
+      saveToLocalStorage({
+        key: "urlInteractions",
+        value: updatedInteractions,
+      });
       return updatedInteractions;
     });
   };
@@ -204,7 +182,10 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
             },
           },
         };
-        // saveToLocalStorage(updatedInteractions);
+        saveToLocalStorage({
+          key: "urlInteractions",
+          value: updatedInteractions,
+        });
         return updatedInteractions;
       });
     }
@@ -242,7 +223,10 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
           },
         },
       };
-      // saveToLocalStorage(updatedInteractions);
+      saveToLocalStorage({
+        key: "urlInteractions",
+        value: updatedInteractions,
+      });
       return updatedInteractions;
     });
   };
@@ -268,7 +252,10 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
           },
         },
       };
-      // saveToLocalStorage(updatedInteractions);
+      saveToLocalStorage({
+        key: "urlInteractions",
+        value: updatedInteractions,
+      });
       return updatedInteractions;
     });
   };
@@ -289,7 +276,10 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
             isBookmarked: true,
           },
         };
-        // saveToLocalStorage(updatedInteractions);
+        saveToLocalStorage({
+          key: "urlInteractions",
+          value: updatedInteractions,
+        });
         return updatedInteractions;
       });
     } else if (messageType === MessageType.BOOKMARK_REMOVED) {
@@ -301,7 +291,10 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
             isBookmarked: false,
           },
         };
-        // saveToLocalStorage(updatedInteractions);
+        saveToLocalStorage({
+          key: "urlInteractions",
+          value: updatedInteractions,
+        });
         return updatedInteractions;
       });
     }
@@ -326,7 +319,10 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
           ],
         },
       };
-      // saveToLocalStorage(updatedInteractions);
+      saveToLocalStorage({
+        key: "urlInteractions",
+        value: updatedInteractions,
+      });
       return updatedInteractions;
     });
   };
@@ -372,7 +368,7 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
         input.removeEventListener("input", handleKeyStrokes);
       });
       // Save state to local storage when the component unmounts
-      // saveToLocalStorage(urlInteractions);
+      saveToLocalStorage({ key: "urlInteractions", value: urlInteractions });
     };
   }, []);
 
@@ -381,38 +377,25 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
     handleReload();
   }, []);
 
-  // useEffect(() => {
-  //   // Update the urlInteractions state when the tabUrl changes
-  //   setUrlInteractions((prev) => {
-  //     const currentUrl = window.location.href;
-  //     return {
-  //       ...prev,
-  //       [currentUrl]: {
-  //         ...(prev[currentUrl] ?? initializeUrlState()),
-  //       },
-  //     };
-  //   });
-  //   // update total time spent when the tabUrl changes
-  //   // handleUnload();
-  // }, [tabUrl]);
-
   useEffect(() => {
     // Update the urlInteractions state when the tabUrl changes
-    const currentUrl = url.current;
+    const currentUrl = urlRef.current;
     const newUrl = tabUrl;
-    if (currentUrl === newUrl) {
+    if (currentUrl == newUrl) {
       return;
     }
     setUrlInteractions((prev) => {
       const updatedInteractions = { ...prev };
       // Update time spent on the current URL
+      const pevTotatTimeSpent = updatedInteractions[currentUrl]?.totalTimeSpent;
       if (prev[currentUrl]) {
         if (isActive.current) {
           const timeSpent = Date.now() - startTime.current;
           totalTimeSpent.current += timeSpent;
           isActive.current = false;
-          updatedInteractions[currentUrl].totalTimeSpent =
-            totalTimeSpent.current;
+          updatedInteractions[currentUrl].totalTimeSpent = pevTotatTimeSpent
+            ? pevTotatTimeSpent + totalTimeSpent.current
+            : totalTimeSpent.current;
         }
       }
       // Initialize new URL state if it doesn't exist
@@ -423,18 +406,14 @@ export default function TrackInteractions({ tabUrl }: { tabUrl: string }) {
       startTime.current = Date.now();
       totalTimeSpent.current = 0;
       isActive.current = true;
+      urlRef.current = newUrl;
+      saveToLocalStorage({
+        key: "urlInteractions",
+        value: updatedInteractions,
+      });
       return updatedInteractions;
     });
   }, [tabUrl]);
 
-  return (
-    <Card className="fp-max-h-[340px] fp-h-fit fp-overflow-y-scroll fp-border-none">
-      <div id="json-tree">
-        <JSONTree data={urlInteractions} theme={theme} invertTheme={false} />
-      </div>
-      {/* <div>
-        <pre>{JSON.stringify(urlInteractions, null, 2)}</pre>
-      </div> */}
-    </Card>
-  );
+  return { urlInteractions };
 }

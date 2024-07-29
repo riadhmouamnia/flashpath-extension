@@ -11,6 +11,6 @@ export default defineConfig({
   },
   modules: ["@wxt-dev/module-react"],
   runner: {
-    startUrls: ["https://google.com"],
+    startUrls: ["https://github.com/riadhmouamnia"],
   },
 });
