@@ -21,7 +21,7 @@ export default defineContentScript({
         const wrapper = document.createElement("div");
         container.append(wrapper);
 
-        const root = ReactDOM.createRoot(container);
+        const root = ReactDOM.createRoot(wrapper);
         root.render(
           <ThemeProvider>
             <Header />
