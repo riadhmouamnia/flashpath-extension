@@ -2,6 +2,7 @@ import { useState } from "react";
 import "../../assets/main.css";
 import { Button } from "@/components/ui/button";
 import { MessageType } from "@/entrypoints/types";
+import Interactions from "@/components/interactions";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch";
 const MEDIUM_URL = "https://medium.com";
@@ -30,6 +31,7 @@ export default () => {
       <p>{url}</p>
       <p>YT. {count}</p>
       <Button onClick={increment}>Increment</Button>
+      <Interactions tabUrl={url} />
     </div>
   );
 };
