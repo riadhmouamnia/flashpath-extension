@@ -23,3 +23,16 @@ export const loadFromLocalStorage = (key: string) => {
 export const clearLocalStorage = (key: string) => {
   localStorage.removeItem(key);
 };
+
+export const setThemeToBody = (theme: string) => {
+  const element = document.querySelector("wxt-react-example");
+  if (element) {
+    const shadowRoot = element.shadowRoot;
+    if (shadowRoot) {
+      const body = shadowRoot.querySelector("body");
+      if (body) {
+        body.className = theme;
+      }
+    }
+  }
+};

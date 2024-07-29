@@ -2,6 +2,7 @@ import { CiDark, CiLight } from "react-icons/ci";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "./ui/button";
 import { MessageType } from "@/entrypoints/types";
+import { setThemeToBody } from "@/lib/utils";
 
 export default function ToggleThemeButton() {
   const { theme, toggleTheme } = useTheme();
@@ -9,17 +10,7 @@ export default function ToggleThemeButton() {
   const handleToggleTheme = async () => {
     const newTheme = theme === "light" ? "dark" : "light";
     toggleTheme(newTheme);
-    const element = document.querySelector("wxt-react-example");
-    if (element) {
-      const shadowRoot = element.shadowRoot;
-      if (shadowRoot) {
-        const body = shadowRoot.querySelector("body");
-        if (body) {
-          body.className = newTheme;
-        }
-      }
-    }
-    toggleTheme(theme);
+    setThemeToBody(newTheme);
     await browser.runtime.sendMessage({
       messageType: MessageType.CHANGE_THEME,
       content: newTheme,

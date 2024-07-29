@@ -1,4 +1,5 @@
 // ThemeContext.js
+import { setThemeToBody } from "@/lib/utils";
 import React, { createContext, useState, useContext, useEffect } from "react";
 
 const ThemeContext = createContext<{ theme: string; toggleTheme: Function }>({
@@ -17,29 +18,12 @@ export const ThemeProvider = ({ children }: { children: any }) => {
 
   async function initTheme() {
     let data = await browser.storage.local.get("theme");
-    const element = document.querySelector("wxt-react-example");
     if (data.theme) {
       setTheme(data.theme);
-      if (element) {
-        const shadowRoot = element.shadowRoot;
-        if (shadowRoot) {
-          const body = shadowRoot.querySelector("body");
-          if (body) {
-            body.className = data.theme;
-          }
-        }
-      }
+      setThemeToBody(data.theme);
     } else {
       await browser.storage.local.set({ theme: "light" });
-      if (element) {
-        const shadowRoot = element.shadowRoot;
-        if (shadowRoot) {
-          const body = shadowRoot.querySelector("body");
-          if (body) {
-            body.className = "light";
-          }
-        }
-      }
+      setThemeToBody("light");
     }
   }
 
