@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+// const defaultTheme = require("tailwindcss/defaultTheme");
 
 function rem2px(input, fontSize = 16) {
   if (input == null) {

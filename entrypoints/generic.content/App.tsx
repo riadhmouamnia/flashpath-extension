@@ -1,8 +1,10 @@
-import { useState } from "react";
-import "../../assets/main.css";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageType } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
+import { useTheme } from "@/components/theme-provider";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch";
 const MEDIUM_URL = "https://medium.com";
@@ -11,6 +13,8 @@ export default () => {
   const [count, setCount] = useState(1);
   const increment = () => setCount((count) => count + 1);
   const [url, setUrl] = useState(window.location.href);
+  const { theme, toggleTheme } = useTheme();
+  const themes = ["light", "dark"];
 
   useEffect(() => {
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
