@@ -1,11 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../../assets/main.css";
 import { Button } from "@/components/ui/button";
 import { MessageType } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
-
-const YOUTUBE_URL = "https://www.youtube.com/watch";
-const MEDIUM_URL = "https://medium.com";
 
 export default () => {
   const [count, setCount] = useState(1);
