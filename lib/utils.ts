@@ -36,3 +36,29 @@ export const setThemeToBody = (theme: string) => {
     }
   }
 };
+
+export const toggle = () => {
+  const element = document.querySelector("wxt-react-example");
+  if (element) {
+    const shadowRoot = element.shadowRoot;
+    if (shadowRoot) {
+      const body = shadowRoot.querySelector("body");
+      if (!body) {
+        return;
+      }
+
+      // change right: 0px style to right: -600px
+      const style = getComputedStyle(body);
+      const right = style.getPropertyValue("right");
+      const newValue = right === "0px" ? "-600px" : "0px";
+      body.style.right = newValue;
+
+      //  or "toggle", body.style.display
+      //   if (body.style.display === "none") {
+      //     body.style.display = "block";
+      //   } else {
+      //     body.style.display = "none";
+      //   }
+    }
+  }
+};

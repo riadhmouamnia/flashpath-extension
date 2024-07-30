@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { MessageType } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
-import { setThemeToBody } from "@/lib/utils";
+import { setThemeToBody, toggle } from "@/lib/utils";
 
 export default () => {
   const [count, setCount] = useState(1);
@@ -18,13 +18,15 @@ export default () => {
       if (message.messageType == MessageType.TAB_CHANGE) {
         const tabUrl = message.data.url;
         setUrl(tabUrl);
-      } else if (message.messageType == MessageType.URL_CHANGE) {
+      } else if (message.messageType === MessageType.URL_CHANGE) {
         const url = message.data.url;
         setUrl(url);
-      } else if (message.messageType == MessageType.CHANGE_THEME) {
+      } else if (message.messageType === MessageType.CHANGE_THEME) {
         const newTheme = message.content;
         toggleTheme(newTheme);
         setThemeToBody(newTheme);
+      } else if (message.messageType === MessageType.CLICK_EXTENSION) {
+        toggle();
       }
     });
   }, []);
