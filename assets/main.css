@@ -64,7 +64,7 @@
     @apply fp-border-border;
   }
   body {
-    @apply fp-bg-background fp-text-foreground fp-w-[400px] fp-h-screen fp-fixed fp-top-0 fp-right-0 fp-z-[999999999999] fp-p-6;
+    @apply fp-bg-background fp-text-foreground fp-w-[400px] fp-h-screen fp-fixed fp-top-0 fp-right-0 fp-z-[999999999999] fp-p-6 fp-duration-300 fp-transition-all fp-rounded-tl-2xl fp-rounded-bl-2xl fp-drop-shadow-xl;
   }
 }
 

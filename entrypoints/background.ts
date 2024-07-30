@@ -47,7 +47,7 @@ export default defineBackground(() => {
     }
   });
 
-  // listen for bookmark changes
+  // listen for bookmark changes, you need to add permissions: ["bookmarks"] in manifest.json (wxt.config.ts) for this to work
   browser.bookmarks.onCreated.addListener((id, bookmark) => {
     console.log("bookmark created: ", bookmark);
     browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
@@ -72,6 +72,7 @@ export default defineBackground(() => {
     });
   });
 
+  // listen for theme changes
   browser.runtime.onMessage.addListener(
     async (
       message: ExtMessage,
@@ -91,4 +92,13 @@ export default defineBackground(() => {
       }
     }
   );
+
+  // listen for extension icon click, you need to add action {} in manifest.json (wxt.config.ts) for this to work
+  browser.action.onClicked.addListener((tab) => {
+    console.log("click icon");
+    console.log(tab);
+    browser.tabs.sendMessage(tab.id!, {
+      messageType: MessageType.CLICK_EXTENSION,
+    });
+  });
 });

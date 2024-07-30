@@ -5,7 +5,7 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   manifest: {
     permissions: ["bookmarks", "storage"],
-    // action: {},
+    action: {},
     // name: "__MSG_extName__",
     // description: "__MSG_extDescription__",
     // default_locale: "en",
