@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import NoteForm from "./note-form";
 import { Tag } from "emblor";
 import ShowNotesButton from "./show-notes-button";
@@ -9,7 +9,7 @@ import { loadFromBrowserStorage, saveToBrowserStorage } from "@/lib/utils";
 // import NoteList from "./note-list";
 import NoteListV2 from "./note-list-v2";
 
-export default function Notes({ tabUrl }: { tabUrl: string }) {
+const Notes = memo(function ({ tabUrl }: { tabUrl: string }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
@@ -104,4 +104,6 @@ export default function Notes({ tabUrl }: { tabUrl: string }) {
         (notes.length > 0 ? <NoteListV2 notes={notes} /> : <p>No notes yet</p>)}
     </div>
   );
-}
+});
+
+export default Notes;
