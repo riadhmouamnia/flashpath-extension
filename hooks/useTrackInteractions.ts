@@ -161,7 +161,7 @@ export default function useTrackInteractions(tabUrl: string) {
       console.log("Trying to select text in the extension");
       return;
     }
-    const selectedText = window.getSelection()?.toString();
+    const selectedText = window.getSelection()?.toString().trim();
     if (selectedText) {
       setUrlInteractions((prev) => {
         const updatedInteractions = {
