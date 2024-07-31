@@ -5,11 +5,12 @@ import { MessageType } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
 import { setThemeToBody, toggle } from "@/lib/utils";
+import YTNotes from "@/components/youtube/yt-notes";
+import Notes from "@/components/shared/notes";
 
 export default () => {
-  const [count, setCount] = useState(1);
-  const increment = () => setCount((count) => count + 1);
   const [url, setUrl] = useState(window.location.href);
+  const [ytVideoId, setYtVideoId] = useState<string | null>(null);
   const { toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -28,6 +29,8 @@ export default () => {
         setThemeToBody(newTheme);
       } else if (message.messageType === MessageType.CLICK_EXTENSION) {
         toggle();
+      } else if (message.messageType === MessageType.YT_VIDEO_ID) {
+        setYtVideoId(message.data.videoId);
       }
     });
   }, []);
@@ -35,9 +38,13 @@ export default () => {
   return (
     <div>
       <p>{url}</p>
-      <p>YT. {count}</p>
-      <Button onClick={increment}>Increment</Button>
-      <Interactions tabUrl={url} />
+      <p>YouTube</p>
+      {ytVideoId ? (
+        <YTNotes tabUrl={url} videoId={ytVideoId} />
+      ) : (
+        <Notes tabUrl={url} />
+      )}
+      {/* <Interactions tabUrl={url} /> */}
     </div>
   );
 };

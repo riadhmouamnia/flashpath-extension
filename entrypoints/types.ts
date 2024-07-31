@@ -7,6 +7,7 @@ export enum MessageType {
   CLICK_EXTENSION = "CLICK_EXTENSION",
   BOOKMARK_CREATED = "BOOKMARK_CREATED",
   BOOKMARK_REMOVED = "BOOKMARK_REMOVED",
+  YT_VIDEO_ID = "YT_VIDEO_ID",
 }
 
 export enum MessageFrom {

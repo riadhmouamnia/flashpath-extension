@@ -1,5 +1,5 @@
 import { Note } from "@/entrypoints/types";
-import { CiHashtag, CiSearch } from "react-icons/ci";
+import { CiHashtag, CiSearch, CiTimer } from "react-icons/ci";
 import {
   Card,
   CardContent,
@@ -9,6 +9,7 @@ import {
 } from "../ui/card";
 import { Input } from "../ui/input";
 import { useEffect, useState } from "react";
+import { formatVideoTime } from "@/lib/utils";
 
 export default function NoteListV2({ notes }: { notes: Note[] }) {
   const [search, setSearch] = useState<string>("");
@@ -49,17 +50,23 @@ export default function NoteListV2({ notes }: { notes: Note[] }) {
           key={note.id}
         >
           <CardHeader className="p-4 text-sm pb-2">
-            <CardTitle className="text-white/80">
+            <CardTitle className="text-white/80 flex items-center justify-between gap-2">
               {new Date(note.createdAt).toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
                 day: "2-digit",
                 month: "short",
               })}
+              {note.startTime && note.endTime ? (
+                <span className="text-xs pl-2 flex items-center justify-start gap-1 font-light">
+                  <CiTimer />
+                  {formatVideoTime(note.startTime)} -{" "}
+                  {formatVideoTime(note.endTime)}
+                </span>
+              ) : null}
             </CardTitle>
             {note.tags?.length ? (
-              <CardDescription className="text-xs text-white/80 flex gap-1 1items-center justify-start flex-wrap pl-2 font-light">
-                <CiHashtag className="text-sm" />
+              <CardDescription className="text-xs text-white/80 flex gap-1 1items-center justify-start flex-wrap font-light">
                 tags:
                 {note.tags.map((tag) => (
                   <span

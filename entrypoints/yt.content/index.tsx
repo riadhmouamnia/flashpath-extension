@@ -14,6 +14,7 @@ export default defineContentScript({
       position: "inline",
       anchor: "body",
       append: "first",
+      isolateEvents: true,
       onMount: (container) => {
         // Don't mount react app directly on <body>
         const wrapper = document.createElement("div");

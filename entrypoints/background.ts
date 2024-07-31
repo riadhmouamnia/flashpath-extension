@@ -27,6 +27,35 @@ export default defineBackground(() => {
     }
   });
 
+  // check if the current tab is a youtube video and send the video id to the content script
+  browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    if (
+      tab.url &&
+      !(
+        tab.url.startsWith(CHROME_EXTENSIONS_URL) ||
+        tab.url.startsWith(CHROME_STORE_URL) ||
+        tab.url.startsWith(CHROME_NEW_TAB_URL) ||
+        tab.url.startsWith("about:blank")
+      )
+    ) {
+      const url = new URL(tab.url);
+      if (url.hostname === "www.youtube.com") {
+        const videoId = url.searchParams.get("v");
+        if (videoId) {
+          browser.tabs.sendMessage(tabId, {
+            messageType: MessageType.YT_VIDEO_ID,
+            data: { videoId },
+          });
+        } else {
+          browser.tabs.sendMessage(tabId, {
+            messageType: MessageType.YT_VIDEO_ID,
+            data: { videoId: null },
+          });
+        }
+      }
+    }
+  });
+
   // Listen for tab changes
   browser.tabs.onActivated.addListener(async (activeInfo) => {
     const tab = await browser.tabs.get(activeInfo.tabId);
