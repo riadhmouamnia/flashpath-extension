@@ -1,5 +1,5 @@
 import { Note } from "@/entrypoints/types";
-import { CiCalendarDate, CiHashtag, CiSearch } from "react-icons/ci";
+import { CiHashtag, CiSearch } from "react-icons/ci";
 import {
   Card,
   CardContent,
@@ -7,19 +7,48 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
+import { Input } from "../ui/input";
+import { useEffect, useState } from "react";
 
 export default function NoteListV2({ notes }: { notes: Note[] }) {
+  const [search, setSearch] = useState<string>("");
+  const [filteredNotes, setFilteredNotes] = useState<Note[]>(notes);
+
+  useEffect(() => {
+    setFilteredNotes(
+      notes.filter(
+        (note) =>
+          note.note.toLowerCase().includes(search.toLowerCase()) ||
+          note.tags?.some((tag) =>
+            tag.text.toLowerCase().includes(search.toLowerCase())
+          )
+      )
+    );
+  }, [search, notes]);
+
   return (
     <div
-      className={`flex flex-col gap-2 bg-primary/10 rounded-xl p-2 my-4 overflow-y-scroll no-scrollbar`}
+      className={`flex flex-col h-[400px] pb-8 gap-2 bg-primary/10 rounded-xl p-2 my-4 overflow-y-scroll no-scrollbar`}
     >
-      {notes.map((note) => (
+      {/* <div className="flex gap-1 items-center justify-start w-full bg-primary/10 rounded-lg p-2"> */}
+      <div className="flex gap-1 items-center justify-start w-full border border-primary/10 rounded-lg px-2 py-1">
+        <CiSearch className="text-xl" />
+        <Input
+          className="h-7 b border-none focus-visible:ring-0 shadow-none p-0 text-sm font-light"
+          type="text"
+          placeholder="Search notes"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+      {/* </div> */}
+      {filteredNotes.map((note) => (
         <Card
           className={`text-sm border-none text-white rounded-lg bg-[${note.highlightColor}]`}
           style={{ backgroundColor: note.highlightColor }}
           key={note.id}
         >
-          <CardHeader className="p-4 text-sm">
+          <CardHeader className="p-4 text-sm pb-2">
             <CardTitle className="text-white/80">
               {new Date(note.createdAt).toLocaleTimeString("en-US", {
                 hour: "2-digit",
@@ -29,9 +58,9 @@ export default function NoteListV2({ notes }: { notes: Note[] }) {
               })}
             </CardTitle>
             {note.tags?.length ? (
-              <CardDescription className="text-xs text-white/80 flex gap-1items-center justify-start flex-wrap pl-2">
+              <CardDescription className="text-xs text-white/80 flex gap-1 1items-center justify-start flex-wrap pl-2 font-light">
                 <CiHashtag className="text-sm" />
-                tags:{" "}
+                tags:
                 {note.tags.map((tag) => (
                   <span
                     key={tag.id}
@@ -43,7 +72,7 @@ export default function NoteListV2({ notes }: { notes: Note[] }) {
               </CardDescription>
             ) : null}
           </CardHeader>
-          <CardContent className="text-xs font-light p-4 pt-0">
+          <CardContent className="text-sm font-light p-4 pt-0">
             <p>
               {note.note.length > 28
                 ? note.note.slice(0, 100) + "..."
