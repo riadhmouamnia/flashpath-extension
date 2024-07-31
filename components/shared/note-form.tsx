@@ -1,7 +1,7 @@
 import { Tag, TagInput } from "emblor";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import HighlightColors from "./highlight-colors";
 
 type NoteFormProps = {
@@ -28,6 +28,30 @@ export default function NoteForm({
   highlightColor,
 }: NoteFormProps) {
   const [tagFocused, setTagFocused] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    const textarea =
+      formRef.current?.querySelector<HTMLTextAreaElement>("#note-input");
+    const tagInput =
+      formRef.current?.querySelector<HTMLInputElement>("#tag-input");
+    const handleKeyDown = (event: any) => {
+      if (event.key !== "Enter") {
+        event.stopPropagation();
+      }
+    };
+
+    if (textarea && tagInput) {
+      textarea.addEventListener("keydown", handleKeyDown);
+      tagInput.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      if (textarea && tagInput) {
+        textarea.removeEventListener("keydown", handleKeyDown);
+        tagInput.removeEventListener("keydown", handleKeyDown);
+      }
+    };
+  }, []);
 
   return (
     <form
