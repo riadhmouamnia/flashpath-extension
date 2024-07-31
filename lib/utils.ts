@@ -24,6 +24,38 @@ export const clearLocalStorage = (key: string) => {
   localStorage.removeItem(key);
 };
 
+export const saveToBrowserStorage = async ({
+  key,
+  value,
+}: {
+  key: string;
+  value: any;
+}) => {
+  try {
+    await browser.storage.local.set({ [key]: value });
+  } catch (error) {
+    console.error("Error saving to browser storage", error);
+  }
+};
+
+export const loadFromBrowserStorage = async (key: string) => {
+  try {
+    const data = await browser.storage.local.get(key);
+    return data[key];
+  } catch (error) {
+    console.error("Error loading from browser storage", error);
+    return {};
+  }
+};
+
+export const clearBrowserStorage = async (key: string) => {
+  try {
+    await browser.storage.local.remove(key);
+  } catch (error) {
+    console.error("Error clearing browser storage", error);
+  }
+};
+
 export const setThemeToBody = (theme: string) => {
   const element = document.querySelector("wxt-react-example");
   if (element) {
@@ -62,3 +94,16 @@ export const toggle = () => {
     }
   }
 };
+
+export function formatVideoTime(seconds: number): string | null {
+  if (!seconds) return null;
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  if (hrs > 0) {
+    return `${hrs}:${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  }
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}

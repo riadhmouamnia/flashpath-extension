@@ -1,3 +1,5 @@
+import { Tag } from "emblor";
+
 export enum MessageType {
   URL_CHANGE = "URL_CHANGE",
   TAB_CHANGE = "TAB_CHANGE",
@@ -5,6 +7,7 @@ export enum MessageType {
   CLICK_EXTENSION = "CLICK_EXTENSION",
   BOOKMARK_CREATED = "BOOKMARK_CREATED",
   BOOKMARK_REMOVED = "BOOKMARK_REMOVED",
+  YT_VIDEO_ID = "YT_VIDEO_ID",
 }
 
 export enum MessageFrom {
@@ -88,3 +91,13 @@ export interface UrlIntercations {
 export interface UrlInteractionsState {
   [url: string]: UrlIntercations;
 }
+
+export type Note = {
+  id: number;
+  startTime?: number;
+  endTime?: number;
+  note: string;
+  tags?: Tag[];
+  highlightColor?: string;
+  createdAt: string;
+};

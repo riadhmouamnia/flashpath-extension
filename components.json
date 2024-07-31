@@ -8,7 +8,7 @@
     "css": "assets/main.css",
     "baseColor": "slate",
     "cssVariables": true,
-    "prefix": "fp-"
+    "prefix": ""
   },
   "aliases": {
     "components": "components",

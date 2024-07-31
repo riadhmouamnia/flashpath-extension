@@ -44,7 +44,7 @@ export default function Interactions({ tabUrl }: { tabUrl: string }) {
   const { urlInteractions } = useTrackInteractions(tabUrl);
 
   return (
-    <Card className="fp-max-h-[340px] fp-h-fit fp-overflow-y-scroll fp-border-none">
+    <Card className="max-h-[340px] h-fit overflow-y-scroll border-none">
       <div id="json-tree">
         <JSONTree data={urlInteractions} theme={theme} invertTheme={false} />
       </div>
