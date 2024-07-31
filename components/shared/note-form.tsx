@@ -1,7 +1,7 @@
 import { Tag, TagInput } from "emblor";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import HighlightColors from "./highlight-colors";
 
 type NoteFormProps = {
@@ -28,7 +28,6 @@ export default function NoteForm({
   highlightColor,
 }: NoteFormProps) {
   const [tagFocused, setTagFocused] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     const textarea =
