@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { MessageType } from "@/entrypoints/types";
-import Interactions from "@/components/interactions";
+// import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
 import { setThemeToBody, toggle } from "@/lib/utils";
 import Notes from "@/components/shared/notes";

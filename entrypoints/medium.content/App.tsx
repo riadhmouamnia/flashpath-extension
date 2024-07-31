@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import "../../assets/main.css";
-import { Button } from "@/components/ui/button";
 import { MessageType } from "@/entrypoints/types";
-import Interactions from "@/components/interactions";
+// import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
 import { setThemeToBody, toggle } from "@/lib/utils";
+import Notes from "@/components/shared/notes";
 
 export default () => {
-  const [count, setCount] = useState(1);
-  const increment = () => setCount((count) => count + 1);
   const [url, setUrl] = useState(window.location.href);
   const { toggleTheme } = useTheme();
 
@@ -35,9 +33,9 @@ export default () => {
   return (
     <div>
       <p>{url}</p>
-      <p>Medium. {count}</p>
-      <Button onClick={increment}>Increment</Button>
-      <Interactions tabUrl={url} />
+      <p>Medium</p>
+      <Notes tabUrl={url} />
+      {/* <Interactions tabUrl={url} /> */}
     </div>
   );
 };
