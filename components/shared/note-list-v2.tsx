@@ -8,12 +8,13 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Input } from "../ui/input";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatVideoTime } from "@/lib/utils";
 
 export default function NoteListV2({ notes }: { notes: Note[] }) {
   const [search, setSearch] = useState<string>("");
   const [filteredNotes, setFilteredNotes] = useState<Note[]>(notes);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setFilteredNotes(
@@ -27,6 +28,23 @@ export default function NoteListV2({ notes }: { notes: Note[] }) {
     );
   }, [search, notes]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      if (event.key !== "Enter") {
+        event.stopPropagation();
+      }
+    };
+
+    if (inputRef.current) {
+      inputRef.current.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      if (inputRef.current) {
+        inputRef.current.removeEventListener("keydown", handleKeyDown);
+      }
+    };
+  }, []);
+
   return (
     <div
       className={`flex flex-col h-[400px] pb-8 gap-2 bg-primary/10 rounded-xl p-2 my-4 overflow-y-scroll no-scrollbar`}
@@ -35,6 +53,7 @@ export default function NoteListV2({ notes }: { notes: Note[] }) {
       <div className="flex gap-1 items-center justify-start w-full border border-primary/10 rounded-lg px-2 py-1">
         <CiSearch className="text-xl" />
         <Input
+          ref={inputRef}
           className="h-7 b border-none focus-visible:ring-0 shadow-none p-0 text-sm font-light"
           type="text"
           placeholder="Search notes"
