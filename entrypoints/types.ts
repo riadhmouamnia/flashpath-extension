@@ -1,3 +1,5 @@
+import { Tag } from "emblor";
+
 export enum MessageType {
   URL_CHANGE = "URL_CHANGE",
   TAB_CHANGE = "TAB_CHANGE",
@@ -88,3 +90,13 @@ export interface UrlIntercations {
 export interface UrlInteractionsState {
   [url: string]: UrlIntercations;
 }
+
+export type Note = {
+  id: number;
+  startTime?: number;
+  endTime?: number;
+  note: string;
+  tags?: Tag[];
+  highlightColor?: string;
+  createdAt: string;
+};

@@ -33,7 +33,7 @@ module.exports = {
     "./entrypoints/**/*.{html,ts,tsx}",
     "./components/**/*.{html,ts,tsx}",
   ],
-  prefix: "fp-",
+  // prefix: "",
   theme: {
     container: {
       center: true,

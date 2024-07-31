@@ -23,9 +23,9 @@ export default function ToggleThemeButton() {
   return (
     <Button onClick={handleToggleTheme} size="icon" variant="ghost">
       {theme === "light" ? (
-        <CiDark className="fp-text-lg" />
+        <CiDark className="text-lg" />
       ) : (
-        <CiLight className="fp-text-lg" />
+        <CiLight className="text-lg" />
       )}
     </Button>
   );

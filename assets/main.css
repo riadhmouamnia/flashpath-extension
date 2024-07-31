@@ -61,15 +61,28 @@
 
 @layer base {
   * {
-    @apply fp-border-border;
+    @apply border-border;
   }
   body {
-    @apply fp-bg-background fp-text-foreground fp-w-[400px] fp-h-screen fp-fixed fp-top-0 fp-right-0 fp-z-[999999999999] fp-p-6 fp-duration-300 fp-transition-all fp-rounded-tl-2xl fp-rounded-bl-2xl fp-drop-shadow-xl;
+    @apply bg-background text-foreground w-[400px] h-screen fixed top-0 right-0 z-[999999999999] p-6 duration-300 transition-all rounded-tl-2xl rounded-bl-2xl drop-shadow-xl;
   }
 }
 
 @layer base {
   #json-tree > ul {
-    @apply fp-m-0 fp-p-4 fp-text-xs !important;
+    @apply m-0 p-4 text-xs !important;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
 }
