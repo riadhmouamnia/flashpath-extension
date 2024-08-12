@@ -15,6 +15,10 @@ export default defineConfig({
     plugins: [react()],
   }),
   runner: {
-    startUrls: ["https://github.com/riadhmouamnia"],
+    startUrls: [
+      "https://github.com/riadhmouamnia",
+      "https://medium.com/",
+      "https://www.youtube.com/watch?v=9noryYsLaiQ&t=3s&ab_channel=Requestly",
+    ],
   },
 });

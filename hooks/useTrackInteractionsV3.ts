@@ -5,38 +5,39 @@ import {
   MessageType,
   UrlInteractionsState,
 } from "@/entrypoints/types";
-import { loadFromLocalStorage, saveToLocalStorage } from "@/lib/utils";
+import {
+  loadFromBrowserStorage,
+  loadFromLocalStorage,
+  saveToBrowserStorage,
+  saveToLocalStorage,
+} from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
-const initializeUrlState = () => ({
+const initializeUrlState = (url: string) => ({
+  url,
   totalTimeSpent: 0,
   reloadCount: 0,
   hasScrolledFullPage: false,
   isBookmarked: false,
-  interactions: {
-    textHighlightEvent: [],
-    mediaEvent: [],
-    clickEvent: [],
-  },
+  textHighlightEvent: [],
+  mediaEvent: [],
+  clickEvent: [],
   scrollPosition: [],
   Keystrokes: [],
 });
 
+const userId = 123;
+const pathId = 123456;
+
 export default function useTrackInteractions(tabUrl: string) {
   const [urlInteractions, setUrlInteractions] = useState<UrlInteractionsState>(
-    () => {
-      const savedState = loadFromLocalStorage("urlInteractions");
-      return savedState[tabUrl]
-        ? savedState
-        : { [tabUrl]: initializeUrlState() };
-    }
+    () => ({ [tabUrl]: initializeUrlState(tabUrl) })
   );
 
   const urlRef = useRef(tabUrl);
   const startTime = useRef(Date.now());
   const totalTimeSpent = useRef(0);
   const isActive = useRef(true);
-  const url = useRef(tabUrl);
 
   // calculate total time spent on the page
   const handleTimeSpent = () => {
@@ -45,19 +46,25 @@ export default function useTrackInteractions(tabUrl: string) {
       const timeSpent = Date.now() - startTime.current;
       totalTimeSpent.current += timeSpent;
       isActive.current = false;
-      setUrlInteractions((prev) => {
-        const updatedInteractions = {
-          ...prev,
-          [window.location.href]: {
-            ...prev[window.location.href],
-            totalTimeSpent: totalTimeSpent.current,
-          },
-        };
-        saveToLocalStorage({
-          key: "urlInteractions",
-          value: updatedInteractions,
+      loadFromBrowserStorage("urlInteractions").then((data) => {
+        const savedTimeSpent = data[window.location.href]?.totalTimeSpent || 0;
+        setUrlInteractions((prev) => {
+          const updatedInteractions = {
+            ...prev,
+            [window.location.href]: {
+              ...prev[window.location.href],
+              totalTimeSpent: savedTimeSpent + totalTimeSpent.current,
+            },
+          };
+          saveToBrowserStorage({
+            key: "urlInteractions",
+            value: updatedInteractions,
+            type: "interactions",
+            userId,
+            pathId,
+          });
+          return updatedInteractions;
         });
-        return updatedInteractions;
       });
     } else {
       // Tab becomes active
@@ -73,7 +80,7 @@ export default function useTrackInteractions(tabUrl: string) {
       totalTimeSpent.current += timeSpent;
       setUrlInteractions((prev) => {
         const prevTotalTimeSpent =
-          prev[window.location.href].totalTimeSpent || 0;
+          prev[window.location.href]?.totalTimeSpent || 0;
         const updatedInteractions = {
           ...prev,
           [window.location.href]: {
@@ -81,9 +88,12 @@ export default function useTrackInteractions(tabUrl: string) {
             totalTimeSpent: prevTotalTimeSpent + totalTimeSpent.current,
           },
         };
-        saveToLocalStorage({
+        saveToBrowserStorage({
           key: "urlInteractions",
           value: updatedInteractions,
+          type: "interactions",
+          userId,
+          pathId,
         });
         return updatedInteractions;
       });
@@ -105,10 +115,6 @@ export default function useTrackInteractions(tabUrl: string) {
             reloadCount: prev[window.location.href].reloadCount + 1 || 0,
           },
         };
-        saveToLocalStorage({
-          key: "urlInteractions",
-          value: updatedInteractions,
-        });
         return updatedInteractions;
       });
     }
@@ -124,10 +130,6 @@ export default function useTrackInteractions(tabUrl: string) {
             hasScrolledFullPage: true,
           },
         };
-        saveToLocalStorage({
-          key: "urlInteractions",
-          value: updatedInteractions,
-        });
         return updatedInteractions;
       });
     }
@@ -137,7 +139,7 @@ export default function useTrackInteractions(tabUrl: string) {
         [window.location.href]: {
           ...prev[window.location.href],
           scrollPosition: [
-            ...(prev[window.location.href].scrollPosition ?? []),
+            ...(prev[window.location.href]?.scrollPosition ?? []),
             {
               scrollY: window.scrollY,
               scrollX: window.scrollX,
@@ -146,10 +148,6 @@ export default function useTrackInteractions(tabUrl: string) {
           ],
         },
       };
-      saveToLocalStorage({
-        key: "urlInteractions",
-        value: updatedInteractions,
-      });
       return updatedInteractions;
     });
   };
@@ -170,66 +168,53 @@ export default function useTrackInteractions(tabUrl: string) {
           ...prev,
           [window.location.href]: {
             ...prev[window.location.href],
-            interactions: {
-              ...prev[window.location.href].interactions,
-              textHighlightEvent: [
-                ...(prev[window.location.href].interactions
-                  ?.textHighlightEvent || []),
-                {
-                  highlightedText: selectedText,
-                  timeStamp: Date.now(),
-                },
-              ],
-            },
+            textHighlightEvent: [
+              ...(prev[window.location.href]?.textHighlightEvent || []),
+              {
+                highlightedText: selectedText,
+                timeStamp: Date.now(),
+              },
+            ],
           },
         };
-        saveToLocalStorage({
-          key: "urlInteractions",
-          value: updatedInteractions,
-        });
         return updatedInteractions;
       });
     }
   };
 
   const handleClick = (e: MouseEvent) => {
-    if (
-      e.target instanceof HTMLElement &&
-      e.target.closest("wxt-react-example[data-wxt-shadow-root]")
-    ) {
-      console.log("clicked on extension");
-      return;
-    }
-    setUrlInteractions((prev) => {
-      const updatedInteractions = {
-        ...prev,
-        [window.location.href]: {
-          ...prev[window.location.href],
-          interactions: {
-            ...prev[window.location.href].interactions,
+    const { target } = e;
+    if (target instanceof Element) {
+      if (target.closest("wxt-react-example[data-wxt-shadow-root]")) {
+        console.log("clicked on extension");
+        return;
+      }
+      const clickEvent = {
+        tagName: target.tagName,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        attributes: Array.from(target.attributes).reduce<{
+          [key: string]: string;
+        }>((acc, attr) => {
+          acc[attr.name] = attr.value;
+          return acc;
+        }, {}),
+        timeStamp: Date.now(),
+      };
+      setUrlInteractions((prev) => {
+        const updatedInteractions = {
+          ...prev,
+          [window.location.href]: {
+            ...prev[window.location.href],
             clickEvent: [
-              ...(prev[window.location.href].interactions?.clickEvent ?? []),
-              {
-                tagName: (e.target as HTMLElement).tagName,
-                timeStamp: Date.now(),
-                clientX: e.clientX,
-                clientY: e.clientY,
-                attributes: {
-                  id: (e.target as HTMLElement).id,
-                  class: (e.target as HTMLElement).className,
-                  name: (e.target as HTMLElement).getAttribute("name") || "",
-                },
-              },
+              ...(prev[window.location.href]?.clickEvent ?? []),
+              clickEvent,
             ],
           },
-        },
-      };
-      saveToLocalStorage({
-        key: "urlInteractions",
-        value: updatedInteractions,
+        };
+        return updatedInteractions;
       });
-      return updatedInteractions;
-    });
+    }
   };
 
   const handleMediaEvent = (e: Event) => {
@@ -240,23 +225,16 @@ export default function useTrackInteractions(tabUrl: string) {
         ...prev,
         [window.location.href]: {
           ...prev[window.location.href],
-          interactions: {
-            ...prev[window.location.href].interactions,
-            mediaEvent: [
-              ...(prev[window.location.href].interactions?.mediaEvent ?? []),
-              {
-                event,
-                currentTime: mediaElement.currentTime,
-                timeStamp: Date.now(),
-              },
-            ],
-          },
+          mediaEvent: [
+            ...(prev[window.location.href]?.mediaEvent ?? []),
+            {
+              event,
+              currentTime: mediaElement.currentTime,
+              timeStamp: Date.now(),
+            },
+          ],
         },
       };
-      saveToLocalStorage({
-        key: "urlInteractions",
-        value: updatedInteractions,
-      });
       return updatedInteractions;
     });
   };
@@ -277,10 +255,6 @@ export default function useTrackInteractions(tabUrl: string) {
             isBookmarked: true,
           },
         };
-        saveToLocalStorage({
-          key: "urlInteractions",
-          value: updatedInteractions,
-        });
         return updatedInteractions;
       });
     } else if (messageType === MessageType.BOOKMARK_REMOVED) {
@@ -292,10 +266,6 @@ export default function useTrackInteractions(tabUrl: string) {
             isBookmarked: false,
           },
         };
-        saveToLocalStorage({
-          key: "urlInteractions",
-          value: updatedInteractions,
-        });
         return updatedInteractions;
       });
     }
@@ -309,7 +279,7 @@ export default function useTrackInteractions(tabUrl: string) {
         [window.location.href]: {
           ...prev[window.location.href],
           Keystrokes: [
-            ...(prev[window.location.href].Keystrokes ?? []),
+            ...(prev[window.location.href]?.Keystrokes ?? []),
             {
               inputValue: target.value,
               inputType: target.type,
@@ -320,15 +290,25 @@ export default function useTrackInteractions(tabUrl: string) {
           ],
         },
       };
-      saveToLocalStorage({
-        key: "urlInteractions",
-        value: updatedInteractions,
-      });
       return updatedInteractions;
     });
   };
 
   useEffect(() => {
+    loadFromBrowserStorage("urlInteractions").then((data) => {
+      if (data[tabUrl]) {
+        setUrlInteractions(data);
+      } else {
+        setUrlInteractions((prev) => {
+          const updatedInteractions = {
+            ...prev,
+            [tabUrl]: initializeUrlState(tabUrl),
+          };
+          return updatedInteractions;
+        });
+      }
+    });
+
     browser.runtime.onMessage.addListener(handleMessages);
     document.addEventListener("visibilitychange", handleTimeSpent);
     window.addEventListener("beforeunload", handleUnload);
@@ -368,8 +348,13 @@ export default function useTrackInteractions(tabUrl: string) {
       document.querySelectorAll("input, textarea").forEach((input) => {
         input.removeEventListener("input", handleKeyStrokes);
       });
-      // Save state to local storage when the component unmounts
-      saveToLocalStorage({ key: "urlInteractions", value: urlInteractions });
+      saveToBrowserStorage({
+        key: "urlInteractions",
+        value: urlInteractions,
+        type: "interactions",
+        userId,
+        pathId,
+      });
     };
   }, []);
 
@@ -401,16 +386,19 @@ export default function useTrackInteractions(tabUrl: string) {
       }
       // Initialize new URL state if it doesn't exist
       if (!updatedInteractions[newUrl]) {
-        updatedInteractions[newUrl] = initializeUrlState();
+        updatedInteractions[newUrl] = initializeUrlState(newUrl);
       }
       // Update start time for the new URL
       startTime.current = Date.now();
       totalTimeSpent.current = 0;
       isActive.current = true;
       urlRef.current = newUrl;
-      saveToLocalStorage({
+      saveToBrowserStorage({
         key: "urlInteractions",
         value: updatedInteractions,
+        type: "interactions",
+        userId,
+        pathId,
       });
       return updatedInteractions;
     });

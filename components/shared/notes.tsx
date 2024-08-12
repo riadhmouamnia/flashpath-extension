@@ -9,6 +9,9 @@ import { loadFromBrowserStorage, saveToBrowserStorage } from "@/lib/utils";
 // import NoteList from "./note-list";
 import NoteListV2 from "./note-list-v2";
 
+const userId = 123;
+const pathId = 123456;
+
 const Notes = memo(function ({ tabUrl }: { tabUrl: string }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -58,7 +61,13 @@ const Notes = memo(function ({ tabUrl }: { tabUrl: string }) {
         },
         ...prev,
       ];
-      void saveToBrowserStorage({ key: tabUrl, value: updatedNotes });
+      void saveToBrowserStorage({
+        key: tabUrl,
+        value: updatedNotes,
+        type: "notes",
+        userId,
+        pathId,
+      });
       return updatedNotes;
     });
     form.reset();

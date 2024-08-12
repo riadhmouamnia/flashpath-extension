@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card } from "@/components/ui/card";
-import useTrackInteractions from "@/hooks/useTrackInteractions";
-import { useEffect, useRef, useState } from "react";
+import useTrackInteractions from "@/hooks/useTrackInteractionsV3";
 import { JSONTree } from "react-json-tree";
 
 const theme = {
@@ -26,27 +25,17 @@ const theme = {
   base0F: "#cc6633",
 };
 
-const initializeUrlState = () => ({
-  totalTimeSpent: 0,
-  reloadCount: 0,
-  hasScrolledFullPage: false,
-  isBookmarked: false,
-  interactions: {
-    textHighlightEvent: [],
-    mediaEvent: [],
-    clickEvent: [],
-  },
-  scrollPosition: [],
-  Keystrokes: [],
-});
-
 export default function Interactions({ tabUrl }: { tabUrl: string }) {
   const { urlInteractions } = useTrackInteractions(tabUrl);
 
   return (
     <Card className="max-h-[340px] h-fit overflow-y-scroll border-none">
       <div id="json-tree">
-        <JSONTree data={urlInteractions} theme={theme} invertTheme={false} />
+        <JSONTree
+          data={urlInteractions[tabUrl]}
+          theme={theme}
+          invertTheme={false}
+        />
       </div>
     </Card>
   );

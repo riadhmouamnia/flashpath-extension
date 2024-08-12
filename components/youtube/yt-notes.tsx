@@ -9,6 +9,9 @@ import NoteForm from "../shared/note-form";
 import NoteListV2 from "../shared/note-list-v2";
 import PlayPause from "./play-pause-button";
 
+const userId = 123;
+const pathId = 123456;
+
 const YTNotes = memo(function ({
   tabUrl,
   videoId,
@@ -85,6 +88,7 @@ const YTNotes = memo(function ({
     setNotes((prev) => {
       const updatedNotes = [
         {
+          url: tabUrl,
           id: Date.now(),
           startTime,
           endTime: newEndTime,
@@ -95,7 +99,13 @@ const YTNotes = memo(function ({
         },
         ...prev,
       ];
-      void saveToBrowserStorage({ key: videoId, value: updatedNotes });
+      void saveToBrowserStorage({
+        key: tabUrl,
+        value: updatedNotes,
+        type: "notes",
+        userId,
+        pathId,
+      });
       return updatedNotes;
     });
     form.reset();
@@ -126,7 +136,7 @@ const YTNotes = memo(function ({
 
   useEffect(() => {
     const loadNotes = async () => {
-      const storageValue = await loadFromBrowserStorage(videoId);
+      const storageValue = await loadFromBrowserStorage(tabUrl);
       console.log("storageValue: ", storageValue);
       if (storageValue) {
         setNotes(storageValue);

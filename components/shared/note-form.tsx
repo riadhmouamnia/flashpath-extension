@@ -35,18 +35,18 @@ export default function NoteForm({
     const tagInput =
       formRef.current?.querySelector<HTMLInputElement>("#tag-input");
     const handleKeyDown = (event: any) => {
-      if (event.key !== "Enter") {
-        event.stopPropagation();
-      }
+      event.stopPropagation();
     };
 
     if (textarea && tagInput) {
       textarea.addEventListener("keydown", handleKeyDown);
+      textarea.addEventListener("keyup", handleKeyDown);
       tagInput.addEventListener("keydown", handleKeyDown);
     }
     return () => {
       if (textarea && tagInput) {
         textarea.removeEventListener("keydown", handleKeyDown);
+        textarea.removeEventListener("keyup", handleKeyDown);
         tagInput.removeEventListener("keydown", handleKeyDown);
       }
     };
