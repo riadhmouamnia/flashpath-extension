@@ -8,6 +8,7 @@ import Notes from "@/components/shared/notes";
 export default () => {
   const [url, setUrl] = useState(window.location.href);
   const { toggleTheme } = useTheme();
+  console.log("env: ", import.meta.env.VITE_DATABASE_URL);
 
   useEffect(() => {
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {

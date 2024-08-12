@@ -78,18 +78,31 @@ export type Intercations = {
   clickEvent?: Click[];
 };
 
-export interface UrlIntercations {
+export type Interaction = {
+  url: string;
   totalTimeSpent: number;
-  interactions?: Intercations;
   reloadCount: number;
   scrollPosition?: ScrollEvent[];
   hasScrolledFullPage: boolean;
   isBookmarked: boolean;
   Keystrokes?: Keystrokes[];
-}
+  textHighlightEvent?: TextHighlightEvent[];
+  mediaEvent?: MediaEvent[];
+  clickEvent?: Click[];
+};
+
+export type UrlInteractions = {
+  totalTimeSpent: number;
+  reloadCount: number;
+  scrollPosition?: ScrollEvent[];
+  hasScrolledFullPage: boolean;
+  isBookmarked: boolean;
+  Keystrokes?: Keystrokes[];
+  interactions?: Intercations;
+};
 
 export interface UrlInteractionsState {
-  [url: string]: UrlIntercations;
+  [url: string]: Interaction;
 }
 
 export type Note = {
@@ -100,4 +113,11 @@ export type Note = {
   tags?: Tag[];
   highlightColor?: string;
   createdAt: string;
+};
+
+export type Notes = {
+  videoId?: string; // for youtube
+  url: string;
+  timeStamp: number;
+  notes: Note[];
 };

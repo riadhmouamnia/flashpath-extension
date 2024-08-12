@@ -1,5 +1,10 @@
+import { paths } from "./../server/db/schemas";
+import { UrlInteractions } from "./../entrypoints/types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import * as schema from "../server/db/schemas";
+import { Notes, UrlInteractionsState } from "@/entrypoints/types";
+import { db } from "@/server/db/db";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -27,12 +32,25 @@ export const clearLocalStorage = (key: string) => {
 export const saveToBrowserStorage = async ({
   key,
   value,
+  type,
+  userId,
+  pathId,
 }: {
   key: string;
   value: any;
+  type?: "interactions" | "notes";
+  userId: number;
+  pathId: number;
 }) => {
   try {
     await browser.storage.local.set({ [key]: value });
+    if (type === "interactions") {
+      insertUrlInteraction({ value, userId, pathId } as any);
+    } else if (type === "notes") {
+      insertNotes({ key, value, userId, pathId });
+    } else {
+      console.error("Invalid type");
+    }
   } catch (error) {
     console.error("Error saving to browser storage", error);
   }
@@ -106,4 +124,95 @@ export function formatVideoTime(seconds: number): string | null {
       .padStart(2, "0")}`;
   }
   return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
+export async function insertUrlInteraction({
+  value,
+  userId,
+  pathId,
+}: {
+  value: UrlInteractionsState;
+  userId: number;
+  pathId: number;
+}) {
+  const values = Object.keys(value).map((url) => {
+    const {
+      totalTimeSpent,
+      reloadCount,
+      scrollPosition,
+      hasScrolledFullPage,
+      isBookmarked,
+      Keystrokes,
+      textHighlightEvent,
+      mediaEvent,
+      clickEvent,
+    } = value[url];
+    return {
+      url,
+      totalTimeSpent,
+      reloadCount,
+      scrollPosition,
+      hasScrolledFullPage,
+      isBookmarked,
+      Keystrokes,
+      textHighlightEvent,
+      mediaEvent,
+      clickEvent,
+      pathId,
+      userId,
+    };
+  });
+  try {
+    // insert values and update any existing rows
+    values.forEach(async (value) => {
+      await db
+        .insert(schema.interactions)
+        .values(value as any)
+        .onConflictDoUpdate({
+          target: schema.interactions.url,
+          set: {
+            totalTimeSpent: value.totalTimeSpent as any,
+            reloadCount: value.reloadCount as any,
+            scrollPosition: value.scrollPosition,
+            hasScrolledFullPage: value.hasScrolledFullPage,
+            isBookmarked: value.isBookmarked,
+            Keystrokes: value.Keystrokes,
+            textHighlightEvent: value.textHighlightEvent,
+            mediaEvent: value.mediaEvent,
+            clickEvent: value.clickEvent,
+          },
+        })
+        .execute();
+    });
+  } catch (error) {
+    console.error("Error inserting url interactions", error);
+  }
+}
+export async function insertNotes({
+  key,
+  value,
+  userId,
+  pathId,
+}: {
+  key: string;
+  value: Notes;
+  userId: number;
+  pathId: number;
+}) {
+  const values = { url: key, notes: value, userId, pathId };
+  try {
+    // insert values and update any existing rows
+    await db
+      .insert(schema.notes)
+      .values(values as any)
+      .onConflictDoUpdate({
+        target: schema.notes.url,
+        set: {
+          notes: { ...values.notes },
+        },
+      })
+      .execute();
+  } catch (error) {
+    console.error("Error inserting notes", error);
+  }
 }
