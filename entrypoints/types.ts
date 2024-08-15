@@ -8,6 +8,9 @@ export enum MessageType {
   BOOKMARK_CREATED = "BOOKMARK_CREATED",
   BOOKMARK_REMOVED = "BOOKMARK_REMOVED",
   YT_VIDEO_ID = "YT_VIDEO_ID",
+  USER_LOGGED_IN = "USER_LOGGED_IN",
+  USER_LOGGED_OUT = "USER_LOGGED_OUT",
+  CREATE_PATH = "CREATE_PATH",
 }
 
 export enum MessageFrom {
@@ -17,6 +20,7 @@ export enum MessageFrom {
 
 class ExtMessage {
   content?: string;
+  data?: any;
   from?: MessageFrom;
 
   constructor(messageType: MessageType) {
@@ -121,3 +125,43 @@ export type Notes = {
   timeStamp: number;
   notes: Note[];
 };
+
+/*
+user:
+{
+    "backupCodeEnabled": false,
+    "cachedSessionsWithActivities": null,
+    "createOrganizationEnabled": true,
+    "createdAt": "2024-08-13T14:01:15.682Z",
+    "deleteSelfEnabled": true,
+    "emailAddresses": [],
+    "externalAccounts": [],
+    "externalId": null,
+    "firstName": null,
+    "fullName": null,
+    "hasImage": false,
+    "id": "user_2kbgQfkZ1n1JPK7cy66B0fI75hI",
+    "imageUrl": "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18ya1lJMUI2ZllhRXpJQjRFdjdvNFl4emcxczEiLCJyaWQiOiJ1c2VyXzJrYmdRZmtaMW4xSlBLN2N5NjZCMGZJNzVoSSJ9",
+    "lastName": null,
+    "lastSignInAt": "2024-08-13T23:06:07.688Z",
+    "organizationMemberships": [],
+    "passkeys": [],
+    "passwordEnabled": true,
+    "pathRoot": "/me",
+    "phoneNumbers": [],
+    "primaryEmailAddress": null,
+    "primaryEmailAddressId": null,
+    "primaryPhoneNumber": null,
+    "primaryPhoneNumberId": null,
+    "primaryWeb3Wallet": null,
+    "primaryWeb3WalletId": null,
+    "publicMetadata": {},
+    "samlAccounts": [],
+    "totpEnabled": false,
+    "twoFactorEnabled": false,
+    "unsafeMetadata": {},
+    "updatedAt": "2024-08-13T23:06:07.723Z",
+    "username": "karma2",
+    "web3Wallets": []
+}
+*/

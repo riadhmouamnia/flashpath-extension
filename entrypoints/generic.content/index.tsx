@@ -4,10 +4,15 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import { ThemeProvider } from "@/components/theme-provider.tsx";
 import Header from "@/components/header.tsx";
+import { AuthProvider } from "@/components/auth-privider.tsx";
 
 export default defineContentScript({
   matches: ["<all_urls>"],
-  excludeMatches: ["*://www.youtube.com/*", "*://medium.com/*"],
+  excludeMatches: [
+    "*://www.youtube.com/*",
+    "*://medium.com/*",
+    "http://localhost:3000/*",
+  ],
   cssInjectionMode: "ui",
 
   async main(ctx) {

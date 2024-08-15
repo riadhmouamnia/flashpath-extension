@@ -108,8 +108,8 @@ export default defineBackground(() => {
       sender,
       sendResponse: (message: any) => void
     ) => {
-      console.log("background:");
-      console.log(message);
+      // console.log("background:");
+      // console.log(message);
       if (message.messageType === MessageType.CHANGE_THEME) {
         let tabs = await browser.tabs.query({});
         console.log(`tabs:${tabs.length}`);
@@ -119,15 +119,81 @@ export default defineBackground(() => {
           }
         }
       }
+      return true;
+    }
+  );
+
+  // listen for user login/logout
+  browser.runtime.onMessage.addListener(
+    async (
+      message: ExtMessage,
+      sender,
+      sendResponse: (message: any) => void
+    ) => {
+      console.log("background:");
+      console.log(message);
+      if (message.messageType === MessageType.USER_LOGGED_IN) {
+        let tabs = await browser.tabs.query({});
+        await browser.storage.local.set({
+          user: message.data,
+        });
+        console.log(`tabs:${tabs.length}`);
+        if (tabs) {
+          for (const tab of tabs) {
+            void browser.tabs.sendMessage(tab.id!, message);
+          }
+        }
+      } else if (message.messageType === MessageType.USER_LOGGED_OUT) {
+        await browser.storage.local.remove("user");
+        let tabs = await browser.tabs.query({});
+        console.log(`tabs:${tabs.length}`);
+        if (tabs) {
+          for (const tab of tabs) {
+            void browser.tabs.sendMessage(tab.id!, message);
+          }
+        }
+      }
+      return true;
+    }
+  );
+
+  // listen for create path
+  browser.runtime.onMessage.addListener(
+    async (
+      message: ExtMessage,
+      sender,
+      sendResponse: (message: any) => void
+    ) => {
+      console.log("background:");
+      console.log(message);
+      if (message.messageType === MessageType.CREATE_PATH) {
+        await browser.storage.local.set({ path: message.data });
+        let tabs = await browser.tabs.query({});
+        console.log(`tabs:${tabs.length}`);
+        if (tabs) {
+          console.log("sending path to tabs");
+          for (const tab of tabs) {
+            await browser.tabs
+              .sendMessage(tab.id!, message)
+              .then(() => {
+                console.log("sent path to tab");
+              })
+              .catch((err) => {
+                console.error(err);
+              });
+          }
+        }
+      }
+      return true;
     }
   );
 
   // listen for extension icon click, you need to add action {} in manifest.json (wxt.config.ts) for this to work
-  browser.action.onClicked.addListener((tab) => {
-    console.log("click icon");
-    console.log(tab);
-    browser.tabs.sendMessage(tab.id!, {
-      messageType: MessageType.CLICK_EXTENSION,
-    });
-  });
+  // browser.action.onClicked.addListener((tab) => {
+  //   console.log("click icon");
+  //   console.log(tab);
+  //   browser.tabs.sendMessage(tab.id!, {
+  //     messageType: MessageType.CLICK_EXTENSION,
+  //   });
+  // });
 });
