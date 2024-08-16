@@ -126,6 +126,42 @@ export type Notes = {
   notes: Note[];
 };
 
+export type User = {
+  backupCodeEnabled: boolean;
+  cachedSessionsWithActivities: any | null;
+  createOrganizationEnabled: boolean;
+  createdAt: string;
+  deleteSelfEnabled: boolean;
+  emailAddresses: string[];
+  externalAccounts: string[];
+  externalId: string | null;
+  firstName: string | null;
+  fullName: string | null;
+  hasImage: boolean;
+  id: string;
+  imageUrl: string;
+  lastName: string | null;
+  lastSignInAt: string;
+  organizationMemberships: any[];
+  passkeys: any[];
+  passwordEnabled: boolean;
+  pathRoot: string;
+  phoneNumbers: string[];
+  primaryEmailAddress: string | null;
+  primaryEmailAddressId: string | null;
+  primaryPhoneNumber: string | null;
+  primaryPhoneNumberId: string | null;
+  primaryWeb3Wallet: string | null;
+  primaryWeb3WalletId: string | null;
+  publicMetadata: Record<string, unknown>;
+  samlAccounts: any[];
+  totpEnabled: boolean;
+  twoFactorEnabled: boolean;
+  unsafeMetadata: Record<string, unknown>;
+  updatedAt: string;
+  username: string;
+  web3Wallets: any[];
+};
 /*
 user:
 {

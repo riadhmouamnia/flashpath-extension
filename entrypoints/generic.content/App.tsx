@@ -4,44 +4,15 @@ import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
 import { hideUi, setThemeToBody, showUi } from "@/lib/utils";
 import Notes from "@/components/shared/notes";
-// import { useAuthContext } from "@/components/auth-privider";
-import { Button } from "@/components/ui/button";
-
-type User = {
-  username: string;
-  email: string;
-  id: string;
-};
+import { useAuthContext } from "@/components/auth-privider";
 
 export default () => {
   const [url, setUrl] = useState(window.location.href);
   const { toggleTheme } = useTheme();
-  const [user, setUser] = useState<User | null>(null);
   const [path, setPath] = useState<string>("");
-  // const { user }: any = useAuthContext();
+  const { user } = useAuthContext();
 
   useEffect(() => {
-    // send message to background script when first load to check if we have a user
-    async function loadUser() {
-      await browser.storage.local.get("user").then((data) => {
-        if (data.user) {
-          setUser(data.user as User);
-          showUi();
-        } else {
-          hideUi();
-        }
-      });
-      await browser.storage.local.get("path").then((data) => {
-        if (data.path) {
-          setPath(data.path);
-        } else {
-          setPath("");
-        }
-      });
-    }
-
-    loadUser();
-
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log("content:");
       console.log(message);
@@ -55,12 +26,6 @@ export default () => {
         const newTheme = message.content;
         toggleTheme(newTheme);
         setThemeToBody(newTheme);
-      } else if (message.messageType === MessageType.USER_LOGGED_IN) {
-        setUser(message.data);
-        showUi();
-      } else if (message.messageType === MessageType.USER_LOGGED_OUT) {
-        setUser(null);
-        hideUi();
       } else if (message.messageType === MessageType.CREATE_PATH) {
         setPath(message.data);
       }
@@ -68,14 +33,7 @@ export default () => {
     });
   }, []);
 
-  if (!user) {
-    return (
-      <div>
-        <h1>No user</h1>
-        <p>need to log in first</p>
-      </div>
-    );
-  }
+  if (!user) return;
 
   return (
     <div className="h-screen">

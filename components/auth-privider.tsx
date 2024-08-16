@@ -1,6 +1,5 @@
-import { MessageType } from "@/entrypoints/types";
+import { MessageType, User } from "@/entrypoints/types";
 import { hideUi, showUi } from "@/lib/utils";
-import { ClerkProvider, useClerk } from "@clerk/chrome-extension";
 import React, {
   createContext,
   useState,
@@ -9,27 +8,25 @@ import React, {
   useEffect,
 } from "react";
 
-const AuthContext = createContext({ user: null });
+const AuthContext = createContext({ user: null } as { user: User | null });
 
 export const useAuthContext = () => useContext(AuthContext);
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "";
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     // send message to background script when first load to check if we have a user
     async function loadUser() {
-      const data = await browser.storage.local.get("user");
-      console.log(data);
-      if (data.user) {
-        console.log("user: ", data.user);
-        setUser(data.user as any);
-        showUi();
-      } else {
-        hideUi();
-      }
+      await browser.storage.local.get("user").then((data) => {
+        console.log("user in auth context:", data.user);
+        if (data.user) {
+          setUser(data.user as User);
+          showUi();
+        } else {
+          hideUi();
+        }
+      });
     }
 
     loadUser();
@@ -38,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("content:");
       console.log(message);
       if (message.messageType === MessageType.USER_LOGGED_IN) {
-        setUser(message.user);
+        setUser(message.data);
         showUi();
       } else if (message.messageType === MessageType.USER_LOGGED_OUT) {
         setUser(null);
@@ -48,9 +45,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
-  return (
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} syncSessionWithTab>
+  if (!user) {
+    return (
+      <div>
+        <h1>No user</h1>
+        <p>need to log in first</p>
+      </div>
+    );
+  }
+  if (user) {
+    return (
       <AuthContext.Provider value={{ user }}>{children}</AuthContext.Provider>
-    </ClerkProvider>
-  );
+    );
+  }
 };

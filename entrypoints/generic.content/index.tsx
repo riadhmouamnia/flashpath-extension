@@ -29,8 +29,10 @@ export default defineContentScript({
         const root = ReactDOM.createRoot(wrapper);
         root.render(
           <ThemeProvider>
-            <Header />
-            <App />
+            <AuthProvider>
+              <Header />
+              <App />
+            </AuthProvider>
           </ThemeProvider>
         );
         return { root, wrapper };
