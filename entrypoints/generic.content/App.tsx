@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { MessageType } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
-import { setThemeToBody, toggle } from "@/lib/utils";
+import { hideUi, setThemeToBody, showUi } from "@/lib/utils";
 import Notes from "@/components/shared/notes";
+import { useAuthContext } from "@/components/auth-privider";
 
 export default () => {
   const [url, setUrl] = useState(window.location.href);
   const { toggleTheme } = useTheme();
-  console.log("env: ", import.meta.env.VITE_DATABASE_URL);
+  const [path, setPath] = useState<string>("");
+  const { user } = useAuthContext();
 
   useEffect(() => {
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -24,16 +26,21 @@ export default () => {
         const newTheme = message.content;
         toggleTheme(newTheme);
         setThemeToBody(newTheme);
-      } else if (message.messageType === MessageType.CLICK_EXTENSION) {
-        toggle();
+      } else if (message.messageType === MessageType.CREATE_PATH) {
+        setPath(message.data);
       }
+      return true;
     });
   }, []);
 
+  if (!user) return;
+
   return (
     <div className="h-screen">
-      <p>{url}</p>
-      <p>Generic.</p>
+      <p>Logged in as {user.username}</p>
+      {path ? <p>"path: " {path}</p> : <p>path: no path found!</p>}
+      {/* <p>{url}</p>
+      <p>Generic.</p> */}
       <Notes tabUrl={url} />
       <Interactions tabUrl={url} />
     </div>

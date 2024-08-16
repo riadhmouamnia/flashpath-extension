@@ -6,11 +6,14 @@ import { useTheme } from "@/components/theme-provider";
 import { setThemeToBody, toggle } from "@/lib/utils";
 import YTNotes from "@/components/youtube/yt-notes";
 import Notes from "@/components/shared/notes";
+import { useAuthContext } from "@/components/auth-privider";
 
 export default () => {
   const [url, setUrl] = useState(window.location.href);
   const [ytVideoId, setYtVideoId] = useState<string | null>(null);
   const { toggleTheme } = useTheme();
+  const [path, setPath] = useState<string>("");
+  const { user } = useAuthContext();
 
   useEffect(() => {
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -26,18 +29,22 @@ export default () => {
         const newTheme = message.content;
         toggleTheme(newTheme);
         setThemeToBody(newTheme);
-      } else if (message.messageType === MessageType.CLICK_EXTENSION) {
-        toggle();
+      } else if (message.messageType === MessageType.CREATE_PATH) {
+        setPath(message.data);
       } else if (message.messageType === MessageType.YT_VIDEO_ID) {
         setYtVideoId(message.data.videoId);
       }
     });
   }, []);
 
+  if (!user) return;
+
   return (
     <div>
-      <p>{url}</p>
-      <p>YouTube</p>
+      <p>Logged in as {user.username}</p>
+      {path ? <p>"path: " {path}</p> : <p>path: no path found!</p>}
+      {/* <p>{url}</p>
+      <p>YouTube</p> */}
       {ytVideoId ? (
         <YTNotes tabUrl={url} videoId={ytVideoId} />
       ) : (

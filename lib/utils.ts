@@ -44,13 +44,13 @@ export const saveToBrowserStorage = async ({
 }) => {
   try {
     await browser.storage.local.set({ [key]: value });
-    if (type === "interactions") {
-      insertUrlInteraction({ value, userId, pathId } as any);
-    } else if (type === "notes") {
-      insertNotes({ key, value, userId, pathId });
-    } else {
-      console.error("Invalid type");
-    }
+    // if (type === "interactions") {
+    //   insertUrlInteraction({ value, userId, pathId } as any);
+    // } else if (type === "notes") {
+    //   insertNotes({ key, value, userId, pathId });
+    // } else {
+    //   console.error("Invalid type");
+    // }
   } catch (error) {
     console.error("Error saving to browser storage", error);
   }
@@ -109,6 +109,37 @@ export const toggle = () => {
       //   } else {
       //     body.style.display = "none";
       //   }
+    }
+  }
+};
+
+export const showUi = () => {
+  const element = document.querySelector("wxt-react-example");
+  if (element) {
+    const shadowRoot = element.shadowRoot;
+    if (shadowRoot) {
+      const body = shadowRoot.querySelector("body");
+      if (!body) {
+        return;
+      }
+      // change right: to 0px
+      body.style.right = "0px";
+      body.style.display = "block";
+    }
+  }
+};
+export const hideUi = () => {
+  const element = document.querySelector("wxt-react-example");
+  if (element) {
+    const shadowRoot = element.shadowRoot;
+    if (shadowRoot) {
+      const body = shadowRoot.querySelector("body");
+      if (!body) {
+        return;
+      }
+      // change right: to -600px
+      body.style.right = "-600px";
+      body.style.display = "none";
     }
   }
 };
