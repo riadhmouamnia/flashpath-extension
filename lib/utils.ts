@@ -1,56 +1,63 @@
-import { paths } from "./../server/db/schemas";
-import { UrlInteractions } from "./../entrypoints/types";
+import {
+  interactions,
+  paths,
+  notes,
+  users,
+  pages,
+} from "./../server/db/schemas";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import * as schema from "../server/db/schemas";
-import { Notes, UrlInteractionsState } from "@/entrypoints/types";
-import { db } from "@/server/db/db";
+import {
+  DbPage,
+  Interaction,
+  Note,
+  Notes,
+  Page,
+  UrlState,
+} from "@/entrypoints/types";
+import { db } from "@/server/db";
+import { Tag } from "emblor";
+import { eq } from "drizzle-orm";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const saveToLocalStorage = ({
-  key,
-  value,
-}: {
-  key: string;
-  value: any;
-}) => {
-  localStorage.setItem(key, JSON.stringify(value));
-};
+export const initializePage = (url: string) => ({
+  url,
+  domain: new URL(url).hostname,
+  timeOnPage: 0,
+  isBookmarked: false,
+});
 
-export const loadFromLocalStorage = (key: string) => {
-  const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : {};
-};
+// export const saveToLocalStorage = ({
+//   key,
+//   value,
+// }: {
+//   key: string;
+//   value: any;
+// }) => {
+//   localStorage.setItem(key, JSON.stringify(value));
+// };
 
-export const clearLocalStorage = (key: string) => {
-  localStorage.removeItem(key);
-};
+// export const loadFromLocalStorage = (key: string) => {
+//   const data = localStorage.getItem(key);
+//   return data ? JSON.parse(data) : {};
+// };
+
+// export const clearLocalStorage = (key: string) => {
+//   localStorage.removeItem(key);
+// };
 
 export const saveToBrowserStorage = async ({
   key,
   value,
-  type,
-  userId,
-  pathId,
 }: {
   key: string;
   value: any;
-  type?: "interactions" | "notes";
-  userId: number;
-  pathId: number;
 }) => {
   try {
     await browser.storage.local.set({ [key]: value });
-    // if (type === "interactions") {
-    //   insertUrlInteraction({ value, userId, pathId } as any);
-    // } else if (type === "notes") {
-    //   insertNotes({ key, value, userId, pathId });
-    // } else {
-    //   console.error("Invalid type");
-    // }
   } catch (error) {
     console.error("Error saving to browser storage", error);
   }
@@ -157,92 +164,143 @@ export function formatVideoTime(seconds: number): string | null {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
-export async function insertUrlInteraction({
-  value,
+export async function insertUserToDb({
   userId,
-  pathId,
+  username,
 }: {
-  value: UrlInteractionsState;
-  userId: number;
-  pathId: number;
+  userId: string;
+  username: string;
 }) {
-  const values = Object.keys(value).map((url) => {
-    const {
-      totalTimeSpent,
-      reloadCount,
-      scrollPosition,
-      hasScrolledFullPage,
-      isBookmarked,
-      Keystrokes,
-      textHighlightEvent,
-      mediaEvent,
-      clickEvent,
-    } = value[url];
-    return {
-      url,
-      totalTimeSpent,
-      reloadCount,
-      scrollPosition,
-      hasScrolledFullPage,
-      isBookmarked,
-      Keystrokes,
-      textHighlightEvent,
-      mediaEvent,
-      clickEvent,
-      pathId,
-      userId,
-    };
-  });
   try {
-    // insert values and update any existing rows
-    values.forEach(async (value) => {
-      await db
-        .insert(schema.interactions)
-        .values(value as any)
-        .onConflictDoUpdate({
-          target: schema.interactions.url,
-          set: {
-            totalTimeSpent: value.totalTimeSpent as any,
-            reloadCount: value.reloadCount as any,
-            scrollPosition: value.scrollPosition,
-            hasScrolledFullPage: value.hasScrolledFullPage,
-            isBookmarked: value.isBookmarked,
-            Keystrokes: value.Keystrokes,
-            textHighlightEvent: value.textHighlightEvent,
-            mediaEvent: value.mediaEvent,
-            clickEvent: value.clickEvent,
-          },
-        })
-        .execute();
-    });
+    const insertedUser = await db
+      .insert(users)
+      .values({ id: userId, username })
+      .onConflictDoNothing()
+      .returning();
+    console.log("User inserted", insertedUser[0]);
+    return insertedUser[0];
   } catch (error) {
-    console.error("Error inserting url interactions", error);
+    console.error("Error inserting User", error);
   }
 }
-export async function insertNotes({
-  key,
-  value,
+
+export async function insertPathToDb({
+  path,
   userId,
+}: {
+  path: string;
+  userId: string;
+}) {
+  try {
+    const insertedPath = await db
+      .insert(paths)
+      .values({ name: path, userId } as any)
+      .returning();
+    console.log("Path inserted", insertedPath[0]);
+    return insertedPath[0];
+  } catch (error) {
+    console.error("Error inserting Path", error);
+  }
+}
+
+export async function insertPageToDb({
+  page,
   pathId,
 }: {
-  key: string;
-  value: Notes;
-  userId: number;
+  page: DbPage;
   pathId: number;
 }) {
-  const values = { url: key, notes: value, userId, pathId };
   try {
-    // insert values and update any existing rows
-    await db
-      .insert(schema.notes)
-      .values(values as any)
-      .onConflictDoUpdate({
-        target: schema.notes.url,
-        set: {
-          notes: { ...values.notes },
-        },
-      })
-      .execute();
+    const insertedPage = await db
+      .insert(pages)
+      .values({
+        pathId,
+        url: page.url,
+        domain: page.domain,
+        timeOnPage: page.timeOnPage,
+        isBookmarked: page.isBookmarked,
+      } as any)
+      .returning();
+
+    return insertedPage[0];
+
+    // if (insertedPage.length > 0) {
+    //   console.log("Page inserted", insertedPage);
+    //   const insertedInteractions = await insertInteractionsToDb({
+    //     interactions: page.interactions,
+    //     pageId: insertedPage[0].id,
+    //   });
+    // console.log("Interactions inserted", insertedInteractions);
+    // }
+  } catch (error) {
+    console.error("Error inserting Page", error);
+  }
+}
+
+export async function updatePageOnDb({
+  pageId,
+  page,
+}: {
+  pageId: number;
+  page: Page;
+}) {
+  try {
+    const updatedPage = await db
+      .update(pages)
+      .set({
+        timeOnPage: page.timeOnPage,
+        isBookmarked: page.isBookmarked,
+      } as any)
+      .where(eq(pages.id, pageId))
+      .returning();
+    console.log("Page updated: ", updatedPage[0]);
+  } catch (error) {
+    console.error("Error updating Page", error);
+  }
+}
+
+export async function insertInteractionsToDb({
+  interaction,
+  pageId,
+}: {
+  interaction: Interaction;
+  pageId: number;
+}) {
+  try {
+    const insertedInteractions = await db
+      .insert(interactions)
+      .values({ pageId, ...interaction })
+      .returning();
+    console.log("Interaction inserted", insertedInteractions[0]);
+    return insertedInteractions[0];
+  } catch (error) {
+    console.error("Error inserting interactions", error);
+  }
+}
+
+export async function insertNotesToDb({
+  note,
+  pageId,
+}: {
+  note: Note;
+  pageId: number;
+}) {
+  try {
+    const insertedNote = await db
+      .insert(notes)
+      .values({
+        pageId,
+        startTime: note.startTime,
+        endTime: note.endTime,
+        body: note.note,
+        tags: note.tags?.map((tag: Tag) => tag.text),
+        color: note.highlightColor,
+        sort: note.sort,
+        favorite: false,
+        hidden: false,
+      } as any)
+      .returning();
+    console.log("Note inserted", insertedNote);
   } catch (error) {
     console.error("Error inserting notes", error);
   }

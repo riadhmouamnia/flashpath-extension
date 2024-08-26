@@ -1,5 +1,5 @@
 {
-  "id": "a75b0925-8c55-4627-ba85-475a9a58710d",
+  "id": "cb266540-0b7b-48f6-b196-e71758426e54",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
@@ -8,75 +8,27 @@
       "name": "interactions",
       "schema": "",
       "columns": {
-        "url": {
-          "name": "url",
-          "type": "text",
+        "id": {
+          "name": "id",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
-        "total_time_spent": {
-          "name": "total_time_spent",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reload_count": {
-          "name": "reload_count",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "scroll_position": {
-          "name": "scroll_position",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "has_scrolled_full_page": {
-          "name": "has_scrolled_full_page",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_bookmarked": {
-          "name": "is_bookmarked",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "keystrokes": {
-          "name": "keystrokes",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "text_highlight_event": {
-          "name": "text_highlight_event",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "media_event": {
-          "name": "media_event",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "click_event": {
-          "name": "click_event",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "path_id": {
-          "name": "path_id",
-          "type": "numeric",
+        "page_id": {
+          "name": "page_id",
+          "type": "serial",
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "numeric",
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event": {
+          "name": "event",
+          "type": "json",
           "primaryKey": false,
           "notNull": true
         },
@@ -86,36 +38,24 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "interactions_page_id_idx": {
+          "name": "interactions_page_id_idx",
+          "columns": [
+            "page_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
-        "interactions_path_id_paths_id_fk": {
-          "name": "interactions_path_id_paths_id_fk",
+        "interactions_page_id_pages_id_fk": {
+          "name": "interactions_page_id_pages_id_fk",
           "tableFrom": "interactions",
-          "tableTo": "paths",
+          "tableTo": "pages",
           "columnsFrom": [
-            "path_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "interactions_user_id_users_id_fk": {
-          "name": "interactions_user_id_users_id_fk",
-          "tableFrom": "interactions",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
+            "page_id"
           ],
           "columnsTo": [
             "id"
@@ -131,29 +71,68 @@
       "name": "notes",
       "schema": "",
       "columns": {
-        "url": {
-          "name": "url",
-          "type": "text",
+        "id": {
+          "name": "id",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
-        "notes": {
-          "name": "notes",
-          "type": "json",
+        "page_id": {
+          "name": "page_id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "body": {
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
-        "path_id": {
-          "name": "path_id",
-          "type": "numeric",
+        "end_time": {
+          "name": "end_time",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "user_id": {
-          "name": "user_id",
+        "tags": {
+          "name": "tags",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "ARRAY[]::text[]"
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "favorite": {
+          "name": "favorite",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "sort": {
+          "name": "sort",
           "type": "numeric",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -161,36 +140,134 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "notes_page_id_idx": {
+          "name": "notes_page_id_idx",
+          "columns": [
+            "page_id"
+          ],
+          "isUnique": true
+        },
+        "tag_idx": {
+          "name": "tag_idx",
+          "columns": [
+            "tags"
+          ],
+          "isUnique": false
+        },
+        "color_idx": {
+          "name": "color_idx",
+          "columns": [
+            "color"
+          ],
+          "isUnique": false
+        },
+        "favorite_idx": {
+          "name": "favorite_idx",
+          "columns": [
+            "favorite"
+          ],
+          "isUnique": false
+        },
+        "hidden_idx": {
+          "name": "hidden_idx",
+          "columns": [
+            "hidden"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
-        "notes_path_id_paths_id_fk": {
-          "name": "notes_path_id_paths_id_fk",
+        "notes_page_id_pages_id_fk": {
+          "name": "notes_page_id_pages_id_fk",
           "tableFrom": "notes",
-          "tableTo": "paths",
+          "tableTo": "pages",
           "columnsFrom": [
-            "path_id"
+            "page_id"
           ],
           "columnsTo": [
             "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.pages": {
+      "name": "pages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
         },
-        "notes_user_id_users_id_fk": {
-          "name": "notes_user_id_users_id_fk",
-          "tableFrom": "notes",
-          "tableTo": "users",
+        "path_id": {
+          "name": "path_id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "domain": {
+          "name": "domain",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time_on_page": {
+          "name": "time_on_page",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_bookmarked": {
+          "name": "is_bookmarked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "url_idx": {
+          "name": "url_idx",
+          "columns": [
+            "url"
+          ],
+          "isUnique": false
+        },
+        "domain_idx": {
+          "name": "domain_idx",
+          "columns": [
+            "domain"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "pages_path_id_paths_id_fk": {
+          "name": "pages_path_id_paths_id_fk",
+          "tableFrom": "pages",
+          "tableTo": "paths",
           "columnsFrom": [
-            "user_id"
+            "path_id"
           ],
           "columnsTo": [
             "id"
@@ -208,7 +285,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "numeric",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -220,7 +297,7 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "numeric",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -257,12 +334,12 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "numeric",
+          "type": "varchar",
           "primaryKey": true,
           "notNull": true
         },
-        "email": {
-          "name": "email",
+        "username": {
+          "name": "username",
           "type": "text",
           "primaryKey": false,
           "notNull": true

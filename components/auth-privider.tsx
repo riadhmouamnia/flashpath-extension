@@ -31,18 +31,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     loadUser();
 
-    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log("content:");
-      console.log(message);
-      if (message.messageType === MessageType.USER_LOGGED_IN) {
-        setUser(message.data);
-        showUi();
-      } else if (message.messageType === MessageType.USER_LOGGED_OUT) {
-        setUser(null);
-        hideUi();
+    browser.runtime.onMessage.addListener(
+      async (message, sender, sendResponse) => {
+        console.log("content:");
+        console.log(message);
+        if (message.messageType === MessageType.USER_LOGGED_IN) {
+          setUser(message.data);
+          showUi();
+        } else if (message.messageType === MessageType.USER_LOGGED_OUT) {
+          setUser(null);
+          hideUi();
+        }
+        return true;
       }
-      return true;
-    });
+    );
   }, []);
 
   if (!user) {

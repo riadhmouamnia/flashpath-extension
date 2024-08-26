@@ -14,7 +14,7 @@ import {
 } from "@clerk/chrome-extension";
 import { useNavigate, Routes, Route, MemoryRouter } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { insertPathToDb, insertUserToDb } from "@/lib/utils";
 
 function HelloUser() {
   const { isSignedIn, user } = useUser();
@@ -27,16 +27,20 @@ function HelloUser() {
     const form = event.currentTarget as HTMLFormElement;
     const formData = new FormData(form);
     const path = formData.get("path") as string;
+    form.reset();
+    if (!user) {
+      return;
+    }
+    const insertedPath = await insertPathToDb({ path, userId: user.id });
     await browser.runtime.sendMessage({
       messageType: MessageType.CREATE_PATH,
-      data: path,
+      data: insertedPath,
     });
-    form.reset();
   };
 
   async function sendMessageToBackground(isSignedIn: boolean | undefined) {
     console.log("sending message to background");
-    if (isSignedIn === true) {
+    if (isSignedIn === true && user) {
       await browser.runtime.sendMessage({
         messageType: MessageType.USER_LOGGED_IN,
         data: user,
@@ -52,13 +56,24 @@ function HelloUser() {
   const loadPath = async () => {
     await browser.storage.local.get("path").then((data) => {
       if (data.path) {
-        inputRef.current!.value = data.path;
+        inputRef.current!.value = data.path.name;
       }
     });
   };
 
   useEffect(() => {
+    const unsubscribeCallback = clerk.addListener(async (resources) => {
+      console.log("User signed in: ", resources.user);
+      await insertUserToDb({
+        userId: resources.user?.id!,
+        username: resources.user?.username!,
+      });
+    });
     loadPath();
+
+    return () => {
+      unsubscribeCallback();
+    };
   }, []);
 
   useEffect(() => {

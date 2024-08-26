@@ -66,7 +66,7 @@ export default function NoteListV2({ notes }: { notes: Note[] }) {
         <Card
           className={`text-sm border-none text-white rounded-lg bg-[${note.highlightColor}]`}
           style={{ backgroundColor: note.highlightColor }}
-          key={note.id}
+          key={note.createdAt}
         >
           <CardHeader className="p-4 text-sm pb-2">
             <CardTitle className="text-white/80 flex items-center justify-between gap-2">

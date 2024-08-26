@@ -35,6 +35,9 @@ export default function NoteForm({
     const tagInput =
       formRef.current?.querySelector<HTMLInputElement>("#tag-input");
     const handleKeyDown = (event: any) => {
+      if (event.key === "Enter" && event.target.id === "tag-input") {
+        return;
+      }
       event.stopPropagation();
     };
 
