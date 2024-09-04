@@ -73,6 +73,7 @@ export default function useTrackInteractionWithReducer({
   const [interactionKey, setInteractionKey] = useState<string | null>(null);
 
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const inputTimeout = useRef<NodeJS.Timeout | null>(null);
   const keyTimeout = useRef<NodeJS.Timeout | null>(null);
   const urlRef = useRef(tabUrl);
   const startTime = useRef(Date.now());
@@ -197,9 +198,11 @@ export default function useTrackInteractionWithReducer({
         return;
       }
       const clickEvent = {
+        // slect the closest parent elemnmt with tag button or a if the target is not button or a
         tagName: target.tagName,
         clientX: e.clientX,
         clientY: e.clientY,
+        textContent: target.textContent,
         attributes: Array.from(target.attributes).reduce<{
           [key: string]: string;
         }>((acc, attr) => {
@@ -225,17 +228,54 @@ export default function useTrackInteractionWithReducer({
     }
   };
 
-  const handleKeyStrokes = (e: Event) => {
+  const handleInput = (e: Event) => {
     const target = e.target as HTMLInputElement;
     const keyStroke = target.value;
     dispatch({
       type: ActionType.UPDATE_INTERACTION,
       payload: {
-        type: "KEY_EVENT",
+        type: "INPUT_EVENT",
         event: {
           inputValue: keyStroke,
           inputType: target.type,
           inputName: target.name,
+          placeholder: target.placeholder,
+          timestamp: Date.now(),
+        },
+      },
+    });
+
+    // Clear the previous timeout if it exists
+    if (inputTimeout.current) {
+      clearTimeout(inputTimeout.current);
+    }
+
+    // Set a new timeout to register the input event to the database after user stops typing
+    inputTimeout.current = setTimeout(() => {
+      insertInteractionsToDb({
+        interaction: {
+          type: "INPUT_EVENT",
+          event: {
+            inputValue: keyStroke,
+            inputType: target.type,
+            inputName: target.name,
+            placeholder: target.placeholder,
+            timestamp: Date.now(),
+          },
+        },
+        pageId,
+      });
+    }, 1000);
+  };
+
+  const handleKeyPress = (e: KeyboardEvent) => {
+    const keyStroke = e.key;
+    dispatch({
+      type: ActionType.UPDATE_INTERACTION,
+      payload: {
+        type: "KEY_PRESS_EVENT",
+        event: {
+          key: keyStroke,
           timestamp: Date.now(),
         },
       },
@@ -246,15 +286,13 @@ export default function useTrackInteractionWithReducer({
       clearTimeout(keyTimeout.current);
     }
 
-    // Set a new timeout to register the event to the database after user stops typing
+    // Set a new timeout to register the key event to the database after user stops key pressing
     keyTimeout.current = setTimeout(() => {
       insertInteractionsToDb({
         interaction: {
-          type: "KEY_EVENT",
+          type: "KEY_PRESS_EVENT",
           event: {
-            inputValue: keyStroke,
-            inputType: target.type,
-            inputName: target.name,
+            key: keyStroke,
             timestamp: Date.now(),
           },
         },
@@ -325,7 +363,7 @@ export default function useTrackInteractionWithReducer({
     window.addEventListener("unload", handleUnload);
     window.addEventListener("scroll", handleScroll);
     document.addEventListener("mouseup", handleSelectText);
-    document.addEventListener("dblclick", handleClick);
+    document.addEventListener("click", handleClick);
     document.querySelectorAll("video , audio").forEach((mediaElement) => {
       mediaElement.addEventListener("play", handleMediaEvent);
       mediaElement.addEventListener("pause", handleMediaEvent);
@@ -337,9 +375,10 @@ export default function useTrackInteractionWithReducer({
     });
     document.querySelectorAll("input, textarea").forEach((input) => {
       if (input instanceof HTMLInputElement) {
-        input.addEventListener("input", handleKeyStrokes);
+        input.addEventListener("input", handleInput);
       }
     });
+    document.addEventListener("keypress", handleKeyPress);
 
     return () => {
       browser.runtime.onMessage.removeListener(handleMessages);
@@ -348,7 +387,7 @@ export default function useTrackInteractionWithReducer({
       window.removeEventListener("unload", handleUnload);
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("mouseup", handleSelectText);
-      document.removeEventListener("dblclick", handleClick);
+      document.removeEventListener("click", handleClick);
       document.querySelectorAll("video , audio").forEach((mediaElement) => {
         mediaElement.removeEventListener("play", handleMediaEvent);
         mediaElement.removeEventListener("pause", handleMediaEvent);
@@ -359,8 +398,9 @@ export default function useTrackInteractionWithReducer({
         mediaElement.removeEventListener("unmute", handleMediaEvent);
       });
       document.querySelectorAll("input, textarea").forEach((input) => {
-        input.removeEventListener("input", handleKeyStrokes);
+        input.removeEventListener("input", handleInput);
       });
+      document.removeEventListener("keypress", handleKeyPress);
     };
   }, []);
 

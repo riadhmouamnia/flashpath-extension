@@ -38,10 +38,16 @@ export type ScrollEvent = {
   timestamp: number;
 };
 
-export type KeyEvent = {
+export type InputEvent = {
   inputValue: string;
   inputType: string;
   inputName: string;
+  placeholder: string;
+  timestamp: number;
+};
+
+export type KeyPressEvent = {
+  key: string;
   timestamp: number;
 };
 
@@ -70,6 +76,7 @@ export type ClickEvent = {
   tagName: string;
   clientX: number;
   clientY: number;
+  textContent: string | null;
   attributes: {
     [key: string]: string;
   };
@@ -79,11 +86,18 @@ export type ClickEvent = {
 export type Interaction = {
   type:
     | "CLICK_EVENT"
-    | "KEY_EVENT"
+    | "INPUT_EVENT"
+    | "KEY_PRESS_EVENT"
     | "SCROLL_EVENT"
     | "MEDIA_EVENT"
     | "SELECT_EVENT";
-  event: ClickEvent | KeyEvent | ScrollEvent | MediaEvent | SelectEvent;
+  event:
+    | ClickEvent
+    | InputEvent
+    | KeyPressEvent
+    | ScrollEvent
+    | MediaEvent
+    | SelectEvent;
 };
 
 export type Page = {
