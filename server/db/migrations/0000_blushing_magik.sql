@@ -1,11 +1,3 @@
-CREATE TABLE IF NOT EXISTS "interactions" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"page_id" serial NOT NULL,
-	"type" text NOT NULL,
-	"event" json NOT NULL,
-	"created_at" timestamp DEFAULT now()
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "notes" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"page_id" serial NOT NULL,
@@ -37,17 +29,18 @@ CREATE TABLE IF NOT EXISTS "paths" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "rrweb_events" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"page_id" serial NOT NULL,
+	"event" json NOT NULL,
+	"created_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" varchar PRIMARY KEY NOT NULL,
 	"username" text NOT NULL,
 	"created_at" timestamp DEFAULT now()
 );
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "interactions" ADD CONSTRAINT "interactions_page_id_pages_id_fk" FOREIGN KEY ("page_id") REFERENCES "public"."pages"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "notes" ADD CONSTRAINT "notes_page_id_pages_id_fk" FOREIGN KEY ("page_id") REFERENCES "public"."pages"("id") ON DELETE no action ON UPDATE no action;
@@ -67,8 +60,13 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "interactions_page_id_idx" ON "interactions" ("page_id");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "notes_page_id_idx" ON "notes" ("page_id");--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "rrweb_events" ADD CONSTRAINT "rrweb_events_page_id_pages_id_fk" FOREIGN KEY ("page_id") REFERENCES "public"."pages"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "notes_page_id_idx" ON "notes" ("page_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "tag_idx" ON "notes" ("tags");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "color_idx" ON "notes" ("color");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "favorite_idx" ON "notes" ("favorite");--> statement-breakpoint

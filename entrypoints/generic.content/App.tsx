@@ -3,13 +3,10 @@ import { DbPage, MessageType, Network, Path } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
 import {
-  hideUi,
   initializePage,
   insertPageToDb,
-  insertPathToDb,
   saveToBrowserStorage,
   setThemeToBody,
-  showUi,
 } from "@/lib/utils";
 import Notes from "@/components/shared/notes";
 import { useAuthContext } from "@/components/auth-privider";
@@ -43,6 +40,7 @@ export default () => {
     };
 
     loadPath();
+
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log("content:");
       console.log(message);

@@ -1,72 +1,9 @@
 {
-  "id": "cb266540-0b7b-48f6-b196-e71758426e54",
+  "id": "1410c873-db45-4773-952c-bd6c10997180",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
-    "public.interactions": {
-      "name": "interactions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "page_id": {
-          "name": "page_id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "event": {
-          "name": "event",
-          "type": "json",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "interactions_page_id_idx": {
-          "name": "interactions_page_id_idx",
-          "columns": [
-            "page_id"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {
-        "interactions_page_id_pages_id_fk": {
-          "name": "interactions_page_id_pages_id_fk",
-          "tableFrom": "interactions",
-          "tableTo": "pages",
-          "columnsFrom": [
-            "page_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.notes": {
       "name": "notes",
       "schema": "",
@@ -148,7 +85,7 @@
           "columns": [
             "page_id"
           ],
-          "isUnique": true
+          "isUnique": false
         },
         "tag_idx": {
           "name": "tag_idx",
@@ -317,6 +254,55 @@
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.rrweb_events": {
+      "name": "rrweb_events",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "page_id": {
+          "name": "page_id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event": {
+          "name": "event",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "rrweb_events_page_id_pages_id_fk": {
+          "name": "rrweb_events_page_id_pages_id_fk",
+          "tableFrom": "rrweb_events",
+          "tableTo": "pages",
+          "columnsFrom": [
+            "page_id"
           ],
           "columnsTo": [
             "id"

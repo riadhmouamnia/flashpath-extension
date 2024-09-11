@@ -47,23 +47,23 @@ export const pages = pgTable(
   }
 );
 
-export const interactions = pgTable(
-  "interactions",
-  {
-    id: serial("id").primaryKey().notNull(),
-    pageId: serial("page_id")
-      .notNull()
-      .references(() => pages.id),
-    type: text("type").notNull(),
-    event: json("event").notNull(),
-    createdAt: timestamp("created_at").defaultNow(),
-  },
-  (table) => {
-    return {
-      pageIdIdx: index("interactions_page_id_idx").on(table.pageId),
-    };
-  }
-);
+// export const interactions = pgTable(
+//   "interactions",
+//   {
+//     id: serial("id").primaryKey().notNull(),
+//     pageId: serial("page_id")
+//       .notNull()
+//       .references(() => pages.id),
+//     type: text("type").notNull(),
+//     event: json("event").notNull(),
+//     createdAt: timestamp("created_at").defaultNow(),
+//   },
+//   (table) => {
+//     return {
+//       pageIdIdx: index("interactions_page_id_idx").on(table.pageId),
+//     };
+//   }
+// );
 
 export const notes = pgTable(
   "notes",
@@ -116,16 +116,32 @@ export const pagesRelations = relations(pages, ({ one, many }) => ({
   }),
 }));
 
-export const interactionsRelations = relations(interactions, ({ one }) => ({
-  page: one(pages, {
-    fields: [interactions.pageId],
-    references: [pages.id],
-  }),
-}));
+// export const interactionsRelations = relations(interactions, ({ one }) => ({
+//   page: one(pages, {
+//     fields: [interactions.pageId],
+//     references: [pages.id],
+//   }),
+// }));
 
 export const notesRelations = relations(notes, ({ one }) => ({
   page: one(pages, {
     fields: [notes.pageId],
+    references: [pages.id],
+  }),
+}));
+
+export const rrwebEvents = pgTable("rrweb_events", {
+  id: serial("id").primaryKey().notNull(),
+  pageId: serial("page_id")
+    .notNull()
+    .references(() => pages.id),
+  event: json("event").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const rrwebEventsRelations = relations(rrwebEvents, ({ one }) => ({
+  page: one(pages, {
+    fields: [rrwebEvents.pageId],
     references: [pages.id],
   }),
 }));

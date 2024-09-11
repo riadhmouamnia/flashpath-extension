@@ -8,7 +8,6 @@ import {
   insertPageToDb,
   saveToBrowserStorage,
   setThemeToBody,
-  toggle,
 } from "@/lib/utils";
 import YTNotes from "@/components/youtube/yt-notes";
 import Notes from "@/components/shared/notes";
@@ -53,6 +52,16 @@ export default () => {
   }, [path, url]);
 
   useEffect(() => {
+    const loadPath = async () => {
+      await browser.storage.local.get("path").then((data) => {
+        if (data.path) {
+          setPath(data.path);
+        }
+      });
+    };
+
+    loadPath();
+
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log("content:");
       console.log(message);

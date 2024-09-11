@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../../assets/main.css";
 import { DbPage, MessageType, Network, Path } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
@@ -8,7 +8,6 @@ import {
   insertPageToDb,
   saveToBrowserStorage,
   setThemeToBody,
-  toggle,
 } from "@/lib/utils";
 import Notes from "@/components/shared/notes";
 import { useAuthContext } from "@/components/auth-privider";
@@ -51,6 +50,16 @@ export default () => {
   }, [path, url]);
 
   useEffect(() => {
+    const loadPath = async () => {
+      await browser.storage.local.get("path").then((data) => {
+        if (data.path) {
+          setPath(data.path);
+        }
+      });
+    };
+
+    loadPath();
+
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log("content:");
       console.log(message);

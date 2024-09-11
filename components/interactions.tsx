@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card } from "@/components/ui/card";
+import useRRWEBRecorder from "@/hooks/useRRWEBRecorder";
 // import useTrackInteractions from "@/hooks/useTrackInteractionsV4";
-import useTrackInteractionWithReducer from "@/hooks/useTrackInteractionWithReducer2";
+// import useTrackInteractionWithReducer from "@/hooks/useTrackInteractionWithReducer2";
+import usePageInteractions from "@/hooks/usePageInteractions";
 import { JSONTree } from "react-json-tree";
+import { Button } from "./ui/button";
 
 const theme = {
   scheme: "monokai",
@@ -37,13 +40,15 @@ export default function Interactions({
   networkAvailable: boolean;
   pageKey: string;
 }) {
-  // const { urlInteractions } = useTrackInteractions({ tabUrl, pageId });
-  const { urlInteractions } = useTrackInteractionWithReducer({
-    tabUrl,
-    pageId,
-    networkAvailable,
-    pageKey,
-  });
+  // const { urlInteractions } = useTrackInteractionWithReducer({
+  //   tabUrl,
+  //   pageId,
+  //   networkAvailable,
+  //   pageKey,
+  // });
+  const { isRecording, startRecording, stopRecording } =
+    useRRWEBRecorder(pageId);
+  const { urlInteractions } = usePageInteractions({ tabUrl, pageId });
 
   return (
     <>
@@ -54,6 +59,18 @@ export default function Interactions({
         ) : (
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
         )}
+      </div>
+      <div className="flex gap-2 items-center">
+        Recording:{" "}
+        {isRecording ? (
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+        ) : (
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+        )}
+      </div>
+      <div className="flex gap-2 items-center">
+        <Button onClick={startRecording}>Start Recording</Button>
+        <Button onClick={stopRecording}>Stop Recording</Button>
       </div>
       <Card className="max-h-[340px] h-fit overflow-y-scroll border-none">
         <div id="json-tree">

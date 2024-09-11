@@ -1,9 +1,10 @@
 import {
-  interactions,
+  // interactions,
   paths,
   notes,
   users,
   pages,
+  rrwebEvents,
 } from "./../server/db/schemas";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -18,6 +19,7 @@ import {
 import { db } from "@/server/db";
 import { Tag } from "emblor";
 import { eq } from "drizzle-orm";
+import { EventType } from "rrweb";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -259,24 +261,24 @@ export async function updatePageOnDb({
   }
 }
 
-export async function insertInteractionsToDb({
-  interaction,
-  pageId,
-}: {
-  interaction: Interaction;
-  pageId: number;
-}) {
-  try {
-    const insertedInteractions = await db
-      .insert(interactions)
-      .values({ pageId, ...interaction })
-      .returning();
-    console.log("Interaction inserted", insertedInteractions[0]);
-    return insertedInteractions[0];
-  } catch (error) {
-    console.error("Error inserting interactions", error);
-  }
-}
+// export async function insertInteractionsToDb({
+//   interaction,
+//   pageId,
+// }: {
+//   interaction: Interaction;
+//   pageId: number;
+// }) {
+//   try {
+//     const insertedInteractions = await db
+//       .insert(interactions)
+//       .values({ pageId, ...interaction })
+//       .returning();
+//     console.log("Interaction inserted", insertedInteractions[0]);
+//     return insertedInteractions[0];
+//   } catch (error) {
+//     console.error("Error inserting interactions", error);
+//   }
+// }
 
 export async function insertNotesToDb({
   note,
@@ -303,5 +305,23 @@ export async function insertNotesToDb({
     console.log("Note inserted", insertedNote);
   } catch (error) {
     console.error("Error inserting notes", error);
+  }
+}
+
+export async function insertRrwebEventToDb({
+  events,
+  pageId,
+}: {
+  events: EventType[];
+  pageId: number;
+}) {
+  try {
+    const insertedEvent = await db
+      .insert(rrwebEvents)
+      .values(events.map((event) => ({ pageId, event })))
+      .returning();
+    console.log("Event inserted", insertedEvent);
+  } catch (error) {
+    console.error("Error inserting event", error);
   }
 }
