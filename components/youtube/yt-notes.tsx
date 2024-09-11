@@ -1,7 +1,11 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Tag } from "emblor";
 import { Note } from "@/entrypoints/types";
-import { loadFromBrowserStorage, saveToBrowserStorage } from "@/lib/utils";
+import {
+  insertNotesToDb,
+  loadFromBrowserStorage,
+  saveToBrowserStorage,
+} from "@/lib/utils";
 import AddNoteButton from "../shared/add-note-button";
 import ShowNotesButton from "../shared/show-notes-button";
 import ShareButton from "../shared/share-button";
@@ -15,9 +19,11 @@ const pathId = 123456;
 const YTNotes = memo(function ({
   tabUrl,
   videoId,
+  pageId,
 }: {
   tabUrl: string;
   videoId: string;
+  pageId: number;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -88,23 +94,28 @@ const YTNotes = memo(function ({
     setNotes((prev) => {
       const updatedNotes = [
         {
-          url: tabUrl,
-          id: Date.now(),
           startTime,
           endTime: newEndTime,
           note,
           tags,
           highlightColor,
-          createdAt: new Date().toISOString(),
+          createdAt: Date.now(),
+          sort: prev.length + 1,
         },
         ...prev,
       ];
+      insertNotesToDb({
+        note: {
+          note,
+          tags,
+          highlightColor,
+          sort: prev.length + 1,
+        },
+        pageId,
+      } as any);
       void saveToBrowserStorage({
         key: tabUrl,
         value: updatedNotes,
-        type: "notes",
-        userId,
-        pathId,
       });
       return updatedNotes;
     });

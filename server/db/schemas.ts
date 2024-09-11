@@ -1,61 +1,100 @@
-import { relations } from "drizzle-orm";
+import { is, relations, sql } from "drizzle-orm";
 import {
   boolean,
+  index,
   json,
   numeric,
   pgTable,
+  serial,
   text,
   timestamp,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
-  id: numeric("id").primaryKey().notNull(),
+  id: varchar("id").primaryKey().notNull(),
   username: text("username").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const paths = pgTable("paths", {
-  id: numeric("id").primaryKey().notNull(),
+  id: serial("id").primaryKey().notNull(),
   name: text("name").notNull(),
-  userId: numeric("user_id")
+  userId: text("user_id")
     .notNull()
     .references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const interactions = pgTable("interactions", {
-  url: text("url").primaryKey().notNull(),
-  totalTimeSpent: numeric("total_time_spent"),
-  reloadCount: numeric("reload_count"),
-  scrollPosition: json("scroll_position"),
-  hasScrolledFullPage: boolean("has_scrolled_full_page"),
-  isBookmarked: boolean("is_bookmarked"),
-  Keystrokes: json("keystrokes"),
-  textHighlightEvent: json("text_highlight_event"),
-  mediaEvent: json("media_event"),
-  clickEvent: json("click_event"),
-  pathId: numeric("path_id")
-    .notNull()
-    .references(() => paths.id),
-  userId: numeric("user_id")
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+export const pages = pgTable(
+  "pages",
+  {
+    id: serial("id").primaryKey().notNull(),
+    pathId: serial("path_id")
+      .notNull()
+      .references(() => paths.id),
+    url: text("url").notNull(),
+    domain: text("domain").notNull(),
+    timeOnPage: numeric("time_on_page"),
+    isBookmarked: boolean("is_bookmarked"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => {
+    return {
+      urlIdx: index("url_idx").on(table.url),
+      domainIdx: index("domain_idx").on(table.domain),
+    };
+  }
+);
 
-export const notes = pgTable("notes", {
-  url: text("url").primaryKey().notNull(),
-  notes: json("notes"),
-  pathId: numeric("path_id")
-    .notNull()
-    .references(() => paths.id),
-  userId: numeric("user_id")
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+// export const interactions = pgTable(
+//   "interactions",
+//   {
+//     id: serial("id").primaryKey().notNull(),
+//     pageId: serial("page_id")
+//       .notNull()
+//       .references(() => pages.id),
+//     type: text("type").notNull(),
+//     event: json("event").notNull(),
+//     createdAt: timestamp("created_at").defaultNow(),
+//   },
+//   (table) => {
+//     return {
+//       pageIdIdx: index("interactions_page_id_idx").on(table.pageId),
+//     };
+//   }
+// );
+
+export const notes = pgTable(
+  "notes",
+  {
+    id: serial("id").primaryKey().notNull(),
+    pageId: serial("page_id")
+      .notNull()
+      .references(() => pages.id),
+    body: text("body").notNull(),
+    startTime: timestamp("start_time"),
+    endTime: timestamp("end_time"),
+    tags: text("tags")
+      .array()
+      .notNull()
+      .default(sql`ARRAY[]::text[]`),
+    color: text("color"),
+    favorite: boolean("favorite").default(false),
+    hidden: boolean("hidden").default(false),
+    sort: numeric("sort"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => {
+    return {
+      pageIdIdx: index("notes_page_id_idx").on(table.pageId),
+      tagIdx: index("tag_idx").on(table.tags),
+      colorIdx: index("color_idx").on(table.color),
+      favoriteIdx: index("favorite_idx").on(table.favorite),
+      hiddenIdx: index("hidden_idx").on(table.hidden),
+    };
+  }
+);
 
 // relationships
 export const usersRelations = relations(users, ({ many }) => ({
@@ -67,28 +106,42 @@ export const pathsRelations = relations(paths, ({ one, many }) => ({
     fields: [paths.userId],
     references: [users.id],
   }),
-  interactions: many(interactions),
-  notes: many(notes),
+  pages: many(pages),
 }));
 
-export const interactionsRelations = relations(interactions, ({ one }) => ({
+export const pagesRelations = relations(pages, ({ one, many }) => ({
   path: one(paths, {
-    fields: [interactions.pathId],
+    fields: [pages.pathId],
     references: [paths.id],
   }),
-  user: one(users, {
-    fields: [interactions.userId],
-    references: [users.id],
-  }),
 }));
+
+// export const interactionsRelations = relations(interactions, ({ one }) => ({
+//   page: one(pages, {
+//     fields: [interactions.pageId],
+//     references: [pages.id],
+//   }),
+// }));
 
 export const notesRelations = relations(notes, ({ one }) => ({
-  path: one(paths, {
-    fields: [notes.pathId],
-    references: [paths.id],
+  page: one(pages, {
+    fields: [notes.pageId],
+    references: [pages.id],
   }),
-  user: one(users, {
-    fields: [notes.userId],
-    references: [users.id],
+}));
+
+export const rrwebEvents = pgTable("rrweb_events", {
+  id: serial("id").primaryKey().notNull(),
+  pageId: serial("page_id")
+    .notNull()
+    .references(() => pages.id),
+  event: json("event").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const rrwebEventsRelations = relations(rrwebEvents, ({ one }) => ({
+  page: one(pages, {
+    fields: [rrwebEvents.pageId],
+    references: [pages.id],
   }),
 }));

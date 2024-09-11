@@ -35,19 +35,25 @@ export default ExtMessage;
 export type ScrollEvent = {
   scrollY: number;
   scrollX: number;
-  timeStamp: number;
+  timestamp: number;
 };
 
-export type Keystrokes = {
+export type InputEvent = {
   inputValue: string;
   inputType: string;
   inputName: string;
-  timeStamp: number;
+  placeholder: string;
+  timestamp: number;
 };
 
-export type TextHighlightEvent = {
+export type KeyPressEvent = {
+  key: string;
+  timestamp: number;
+};
+
+export type SelectEvent = {
   highlightedText: string;
-  timeStamp: number;
+  timestamp: number;
 };
 
 export type MediaEventType =
@@ -63,60 +69,73 @@ export type MediaEventType =
 export type MediaEvent = {
   event: MediaEventType;
   currentTime: number;
-  timeStamp: number;
+  timestamp: number;
 };
 
-export type Click = {
+export type ClickEvent = {
   tagName: string;
   clientX: number;
   clientY: number;
+  textContent: string | null;
   attributes: {
     [key: string]: string;
   };
-  timeStamp: number;
-};
-
-export type Intercations = {
-  textHighlightEvent?: TextHighlightEvent[];
-  mediaEvent?: MediaEvent[];
-  clickEvent?: Click[];
+  timestamp: number;
 };
 
 export type Interaction = {
+  type:
+    | "CLICK_EVENT"
+    | "INPUT_EVENT"
+    | "KEY_PRESS_EVENT"
+    | "SCROLL_EVENT"
+    | "MEDIA_EVENT"
+    | "SELECT_EVENT";
+  event:
+    | ClickEvent
+    | InputEvent
+    | KeyPressEvent
+    | ScrollEvent
+    | MediaEvent
+    | SelectEvent;
+};
+
+export type Page = {
   url: string;
-  totalTimeSpent: number;
-  reloadCount: number;
-  scrollPosition?: ScrollEvent[];
-  hasScrolledFullPage: boolean;
+  domain: string;
+  timeOnPage: number;
   isBookmarked: boolean;
-  Keystrokes?: Keystrokes[];
-  textHighlightEvent?: TextHighlightEvent[];
-  mediaEvent?: MediaEvent[];
-  clickEvent?: Click[];
 };
 
-export type UrlInteractions = {
-  totalTimeSpent: number;
-  reloadCount: number;
-  scrollPosition?: ScrollEvent[];
-  hasScrolledFullPage: boolean;
-  isBookmarked: boolean;
-  Keystrokes?: Keystrokes[];
-  interactions?: Intercations;
+export type Path = {
+  id: number;
+  createdAt: Date | null;
+  name: string;
+  userId: string;
 };
 
-export interface UrlInteractionsState {
-  [url: string]: Interaction;
+export type DbPage = {
+  id: number;
+  createdAt: Date | null;
+  pathId: number;
+  url: string;
+  domain: string;
+  timeOnPage: string | null;
+  isBookmarked: boolean | null;
+};
+
+export interface UrlState {
+  [url: string]: Page;
 }
 
 export type Note = {
-  id: number;
   startTime?: number;
   endTime?: number;
   note: string;
   tags?: Tag[];
   highlightColor?: string;
-  createdAt: string;
+  sort: number;
+  createdAt: number;
 };
 
 export type Notes = {
@@ -162,6 +181,17 @@ export type User = {
   username: string;
   web3Wallets: any[];
 };
+
+export type Network = {
+  online: boolean;
+  downlink: any;
+  downlinkMax: any;
+  effectiveType: any;
+  rtt: any;
+  saveData: any;
+  type: any;
+};
+
 /*
 user:
 {

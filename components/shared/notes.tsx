@@ -5,14 +5,21 @@ import ShowNotesButton from "./show-notes-button";
 import AddNoteButton from "./add-note-button";
 import ShareButton from "./share-button";
 import { Note } from "@/entrypoints/types";
-import { loadFromBrowserStorage, saveToBrowserStorage } from "@/lib/utils";
+import {
+  insertNotesToDb,
+  loadFromBrowserStorage,
+  saveToBrowserStorage,
+} from "@/lib/utils";
 // import NoteList from "./note-list";
 import NoteListV2 from "./note-list-v2";
 
-const userId = 123;
-const pathId = 123456;
-
-const Notes = memo(function ({ tabUrl }: { tabUrl: string }) {
+const Notes = memo(function ({
+  tabUrl,
+  pageId,
+}: {
+  tabUrl: string;
+  pageId: number;
+}) {
   const formRef = useRef<HTMLFormElement>(null);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
@@ -53,20 +60,26 @@ const Notes = memo(function ({ tabUrl }: { tabUrl: string }) {
     setNotes((prev) => {
       const updatedNotes = [
         {
-          id: Date.now(),
           note,
           tags,
           highlightColor,
-          createdAt: new Date().toISOString(),
+          createdAt: Date.now(),
+          sort: prev.length + 1,
         },
         ...prev,
       ];
+      insertNotesToDb({
+        note: {
+          note,
+          tags,
+          highlightColor,
+          sort: prev.length + 1,
+        },
+        pageId,
+      } as any);
       void saveToBrowserStorage({
         key: tabUrl,
         value: updatedNotes,
-        type: "notes",
-        userId,
-        pathId,
       });
       return updatedNotes;
     });

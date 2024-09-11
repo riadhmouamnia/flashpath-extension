@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card } from "@/components/ui/card";
-import useTrackInteractions from "@/hooks/useTrackInteractionsV3";
+import useRRWEBRecorder from "@/hooks/useRRWEBRecorder";
+// import useTrackInteractions from "@/hooks/useTrackInteractionsV4";
+// import useTrackInteractionWithReducer from "@/hooks/useTrackInteractionWithReducer2";
+import usePageInteractions from "@/hooks/usePageInteractions";
 import { JSONTree } from "react-json-tree";
+import { Button } from "./ui/button";
 
 const theme = {
   scheme: "monokai",
@@ -25,18 +29,54 @@ const theme = {
   base0F: "#cc6633",
 };
 
-export default function Interactions({ tabUrl }: { tabUrl: string }) {
-  const { urlInteractions } = useTrackInteractions(tabUrl);
+export default function Interactions({
+  tabUrl,
+  pageId,
+  networkAvailable,
+  pageKey,
+}: {
+  tabUrl: string;
+  pageId: number;
+  networkAvailable: boolean;
+  pageKey: string;
+}) {
+  // const { urlInteractions } = useTrackInteractionWithReducer({
+  //   tabUrl,
+  //   pageId,
+  //   networkAvailable,
+  //   pageKey,
+  // });
+  const { isRecording, startRecording, stopRecording } =
+    useRRWEBRecorder(pageId);
+  const { urlInteractions } = usePageInteractions({ tabUrl, pageId });
 
   return (
-    <Card className="max-h-[340px] h-fit overflow-y-scroll border-none">
-      <div id="json-tree">
-        <JSONTree
-          data={urlInteractions[tabUrl]}
-          theme={theme}
-          invertTheme={false}
-        />
+    <>
+      <div className="flex gap-2 items-center">
+        Online:{" "}
+        {networkAvailable ? (
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+        ) : (
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+        )}
       </div>
-    </Card>
+      <div className="flex gap-2 items-center">
+        Recording:{" "}
+        {isRecording ? (
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+        ) : (
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+        )}
+      </div>
+      <div className="flex gap-2 items-center">
+        <Button onClick={startRecording}>Start Recording</Button>
+        <Button onClick={stopRecording}>Stop Recording</Button>
+      </div>
+      <Card className="max-h-[340px] h-fit overflow-y-scroll border-none">
+        <div id="json-tree">
+          <JSONTree data={urlInteractions} theme={theme} invertTheme={false} />
+        </div>
+      </Card>
+    </>
   );
 }
