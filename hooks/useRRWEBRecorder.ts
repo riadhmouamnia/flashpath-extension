@@ -1,4 +1,8 @@
-import { insertRrwebEventToDb } from "@/lib/utils";
+import {
+  insertRrwebEventToDb,
+  loadFromBrowserStorage,
+  saveToBrowserStorage,
+} from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EventType } from "rrweb";
 // import { listenerHandler } from "rrweb/typings/types";
@@ -12,6 +16,7 @@ function useRRWEBRecorder(pageId: number) {
   const [isRecording, setIsRecording] = useState(false);
   const save = useCallback(() => {
     if (events.current.length === 0) return;
+    if (!pageId) return;
     insertRrwebEventToDb({ events: events.current, pageId });
     events.current = [];
   }, [pageId]);
@@ -25,10 +30,24 @@ function useRRWEBRecorder(pageId: number) {
     save();
     setIsRecording(false);
     stopRecordingFn.current();
+    saveToBrowserStorage({ key: "isRecording", value: false });
   }, []);
 
   const startRecording = useCallback(() => {
     setIsRecording(true);
+    saveToBrowserStorage({ key: "isRecording", value: true });
+  }, []);
+
+  useEffect(() => {
+    const loadIsRecordingStateFromStorage = async () => {
+      const isRecordingState = await loadFromBrowserStorage("isRecording");
+      if (isRecordingState) {
+        setIsRecording(isRecordingState);
+      } else {
+        setIsRecording(false);
+      }
+    };
+    loadIsRecordingStateFromStorage();
   }, []);
 
   useEffect(() => {
