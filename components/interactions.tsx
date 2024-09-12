@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card } from "@/components/ui/card";
 import useRRWEBRecorder from "@/hooks/useRRWEBRecorder";
-// import useTrackInteractions from "@/hooks/useTrackInteractionsV4";
 // import useTrackInteractionWithReducer from "@/hooks/useTrackInteractionWithReducer2";
 import usePageInteractions from "@/hooks/usePageInteractions";
 import { JSONTree } from "react-json-tree";
@@ -32,12 +31,10 @@ const theme = {
 export default function Interactions({
   tabUrl,
   pageId,
-  networkAvailable,
   pageKey,
 }: {
   tabUrl: string;
   pageId: number;
-  networkAvailable: boolean;
   pageKey: string;
 }) {
   // const { urlInteractions } = useTrackInteractionWithReducer({
@@ -52,14 +49,6 @@ export default function Interactions({
 
   return (
     <>
-      <div className="flex gap-2 items-center">
-        Online:{" "}
-        {networkAvailable ? (
-          <div className="w-3 h-3 rounded-full bg-green-500"></div>
-        ) : (
-          <div className="w-3 h-3 rounded-full bg-red-500"></div>
-        )}
-      </div>
       <div className="flex gap-2 items-center">
         Recording:{" "}
         {isRecording ? (

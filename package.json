@@ -13,7 +13,7 @@
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare",
     "generate": "drizzle-kit generate",
-    "migrate": "tsx ./migrator.ts"
+    "migrate": "dotenv -c -- tsx ./migrator.ts"
   },
   "dependencies": {
     "@clerk/chrome-extension": "^1.2.0",
@@ -37,7 +37,8 @@
     "react-router-dom": "^6.26.0",
     "rrweb": "2.0.0-alpha.16",
     "tailwind-merge": "^2.4.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
@@ -45,6 +46,7 @@
     "@vitejs/plugin-react": "^4.3.1",
     "@wxt-dev/module-react": "^1.0.0",
     "autoprefixer": "^10.4.19",
+    "dotenv-cli": "^7.4.2",
     "drizzle-kit": "0.21.2",
     "postcss": "^8.4.40",
     "tailwindcss": "^3.4.6",

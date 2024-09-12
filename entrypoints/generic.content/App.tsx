@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DbPage, MessageType, Network, Path } from "@/entrypoints/types";
+import { DbPage, MessageType, Path } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
 import {
@@ -10,7 +10,6 @@ import {
 } from "@/lib/utils";
 import Notes from "@/components/shared/notes";
 import { useAuthContext } from "@/components/auth-privider";
-import useNetworkState from "@/hooks/useNetworkState";
 
 export default () => {
   const [url, setUrl] = useState(window.location.href);
@@ -19,16 +18,6 @@ export default () => {
   const [page, setPage] = useState<DbPage | null>(null);
   const { user } = useAuthContext();
   const [pageKey, setPageKey] = useState<string | null>(null);
-  const network = useNetworkState() as Network;
-  const networkAvailable = network.online;
-
-  console.log("networkAvailable: ", networkAvailable);
-
-  useEffect(() => {
-    browser.storage.local.get().then((data) => {
-      console.log("online state changes : ", data);
-    });
-  }, [networkAvailable]);
 
   useEffect(() => {
     const loadPath = async () => {
@@ -65,16 +54,6 @@ export default () => {
     const initPageOnDb = async () => {
       if (!path) return;
       try {
-        // store page in browser.storage.local if network is not available
-        if (!networkAvailable) {
-          const key = `page-${Date.now()}`;
-          setPageKey(key);
-          saveToBrowserStorage({
-            key,
-            value: initializePage(url),
-          });
-          return;
-        }
         const insertedPage = await insertPageToDb({
           page: initializePage(url) as any,
           pathId: path.id,
@@ -104,7 +83,6 @@ export default () => {
           <Interactions
             tabUrl={url}
             pageId={page.id}
-            networkAvailable={networkAvailable}
             pageKey={pageKey as string}
           />
         </>

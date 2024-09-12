@@ -21,16 +21,6 @@ export default () => {
   const [page, setPage] = useState<DbPage | null>(null);
   const { user } = useAuthContext();
   const [pageKey, setPageKey] = useState<string | null>(null);
-  const network = useNetworkState() as Network;
-  const networkAvailable = network.online;
-
-  console.log("networkAvailable: ", networkAvailable);
-
-  useEffect(() => {
-    browser.storage.local.get().then((data) => {
-      console.log("online state changes : ", data);
-    });
-  }, [networkAvailable]);
 
   useEffect(() => {
     const initPageOnDb = async () => {
@@ -87,16 +77,6 @@ export default () => {
     const initPageOnDb = async () => {
       if (!path) return;
       try {
-        // store page in browser.storage.local if network is not available
-        if (!networkAvailable) {
-          const key = `page-${Date.now()}`;
-          setPageKey(key);
-          saveToBrowserStorage({
-            key,
-            value: initializePage(url),
-          });
-          return;
-        }
         const insertedPage = await insertPageToDb({
           page: initializePage(url) as any,
           pathId: path.id,
@@ -130,7 +110,6 @@ export default () => {
           <Interactions
             tabUrl={url}
             pageId={page.id}
-            networkAvailable={networkAvailable}
             pageKey={pageKey as string}
           />
         </>
