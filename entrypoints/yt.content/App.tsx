@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "../../assets/main.css";
-import { DbPage, MessageType, Network, Path } from "@/entrypoints/types";
+import { DbPage, MessageType, Path } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
 import {
