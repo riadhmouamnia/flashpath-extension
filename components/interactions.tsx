@@ -6,6 +6,9 @@ import useRRWEBRecorder from "@/hooks/useRRWEBRecorder";
 import usePageInteractions from "@/hooks/usePageInteractions";
 import { JSONTree } from "react-json-tree";
 import { Button } from "./ui/button";
+import { BsFillRecord2Fill } from "react-icons/bs";
+import { TbPointerPause } from "react-icons/tb";
+import { LuMousePointerClick } from "react-icons/lu";
 
 const theme = {
   scheme: "monokai",
@@ -49,17 +52,24 @@ export default function Interactions({
 
   return (
     <>
-      <div className="flex gap-2 items-center">
-        Recording:{" "}
+      <div className="flex items-center justify-between my-4">
         {isRecording ? (
-          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          <Button onClick={stopRecording} variant="ghost">
+            <TbPointerPause className="text-xl" />
+            "Pause Recording"
+          </Button>
         ) : (
-          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <Button onClick={startRecording} variant="ghost">
+            <LuMousePointerClick className="text-xl" />
+            "Start Recording"
+          </Button>
         )}
-      </div>
-      <div className="flex gap-2 items-center">
-        <Button onClick={startRecording}>Start Recording</Button>
-        <Button onClick={stopRecording}>Stop Recording</Button>
+
+        {isRecording ? (
+          <BsFillRecord2Fill className="text-red-500 animate-pulse text-xl" />
+        ) : (
+          <BsFillRecord2Fill className="text-secondary text-xl" />
+        )}
       </div>
       <Card className="max-h-[340px] h-fit overflow-y-scroll border-none">
         <div id="json-tree">
