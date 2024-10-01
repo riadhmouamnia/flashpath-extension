@@ -1,7 +1,7 @@
 #root-popup {
   margin: 0 auto;
-  text-align: center;
   width: 350px;
+  padding: 20px;
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card } from "@/components/ui/card";
+// import useRRWEBRecorder from "@/hooks/useRRWEBRecorder_sendEvent";
+// import useRRWEBRecorder from "@/hooks/useRRWEBRecorder_WebSocket";
+// import useRRWEBRecorder from "@/hooks/useRRWEBRecorder_SignalR";
+// import useRRWEBRecorder from "@/hooks/useRRWEBRecorder_segments";
 import useRRWEBRecorder from "@/hooks/useRRWEBRecorder";
-// import useTrackInteractionWithReducer from "@/hooks/useTrackInteractionWithReducer2";
 import usePageInteractions from "@/hooks/usePageInteractions";
 import { JSONTree } from "react-json-tree";
 import { Button } from "./ui/button";
 import { BsFillRecord2Fill } from "react-icons/bs";
 import { TbPointerPause } from "react-icons/tb";
 import { LuMousePointerClick } from "react-icons/lu";
-
 const theme = {
   scheme: "monokai",
   author: "wimer hazenberg (http://www.monokai.nl)",
@@ -34,34 +36,45 @@ const theme = {
 export default function Interactions({
   tabUrl,
   pageId,
-  pageKey,
+  pathname,
+  username,
 }: {
   tabUrl: string;
   pageId: number;
-  pageKey: string;
+  pathname: string;
+  username: string;
 }) {
-  // const { urlInteractions } = useTrackInteractionWithReducer({
-  //   tabUrl,
+  const { pageState } = usePageInteractions({ tabUrl, pageId });
+
+  // const { isRecording, startRecording, stopRecording } = useRRWEBRecorder({
   //   pageId,
-  //   networkAvailable,
-  //   pageKey,
+  //   pageUrl: tabUrl,
+  //   username,
+  //   pathname,
+  //   pageState,
   // });
-  const { isRecording, startRecording, stopRecording } =
-    useRRWEBRecorder(pageId);
-  const { urlInteractions } = usePageInteractions({ tabUrl, pageId });
+  const { isRecording, startRecording, stopRecording } = useRRWEBRecorder({
+    pageId,
+  });
 
   return (
     <>
       <div className="flex items-center justify-between my-4">
         {isRecording ? (
-          <Button onClick={stopRecording} variant="ghost">
-            <TbPointerPause className="text-xl" />
-            "Pause Recording"
+          <Button
+            onClick={stopRecording}
+            className="flex items-center gap-1"
+            variant="ghost"
+          >
+            <TbPointerPause className="text-xl" /> Pause Recording
           </Button>
         ) : (
-          <Button onClick={startRecording} variant="ghost">
-            <LuMousePointerClick className="text-xl" />
-            "Start Recording"
+          <Button
+            onClick={startRecording}
+            className="flex items-center gap-1"
+            variant="ghost"
+          >
+            <LuMousePointerClick className="text-xl" /> Start Recording
           </Button>
         )}
 
@@ -73,7 +86,7 @@ export default function Interactions({
       </div>
       <Card className="max-h-[340px] h-fit overflow-y-scroll border-none">
         <div id="json-tree">
-          <JSONTree data={urlInteractions} theme={theme} invertTheme={false} />
+          <JSONTree data={pageState} theme={theme} invertTheme={false} />
         </div>
       </Card>
     </>

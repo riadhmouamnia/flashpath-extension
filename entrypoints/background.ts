@@ -1,5 +1,6 @@
 import { browser } from "wxt/browser";
 import ExtMessage, { MessageType } from "./types";
+import { saveToBrowserStorage } from "@/lib/utils";
 
 const CHROME_STORE_URL = "https://chromewebstore.google.com/";
 const CHROME_EXTENSIONS_URL = "chrome://extensions/";
@@ -167,7 +168,11 @@ export default defineBackground(() => {
       console.log("background:");
       console.log(message);
       if (message.messageType === MessageType.CREATE_PATH) {
-        await browser.storage.local.set({ path: message.data });
+        console.log("key: ", message.data.userId + "_path");
+        await saveToBrowserStorage({
+          key: message.data.userId + "_path",
+          value: message.data,
+        });
         let tabs = await browser.tabs.query({});
         console.log(`tabs:${tabs.length}`);
         if (tabs) {

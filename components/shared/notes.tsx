@@ -12,13 +12,18 @@ import {
 } from "@/lib/utils";
 // import NoteList from "./note-list";
 import NoteListV2 from "./note-list-v2";
+import * as signalR from "@microsoft/signalr";
 
 const Notes = memo(function ({
   tabUrl,
   pageId,
+  pathname,
+  username,
 }: {
   tabUrl: string;
-  pageId: number;
+  pageId?: number;
+  pathname: string;
+  username: string;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -68,6 +73,18 @@ const Notes = memo(function ({
         },
         ...prev,
       ];
+      // void sendNoteToQuix({
+      //   username,
+      //   note: {
+      //     note,
+      //     tags,
+      //     highlightColor,
+      //     createdAt: Date.now(),
+      //     sort: prev.length + 1,
+      //   },
+      //   pathname,
+      //   pageUrl: tabUrl,
+      // });
       insertNotesToDb({
         note: {
           note,
@@ -78,7 +95,7 @@ const Notes = memo(function ({
         pageId,
       } as any);
       void saveToBrowserStorage({
-        key: tabUrl,
+        key: tabUrl + username + pathname,
         value: updatedNotes,
       });
       return updatedNotes;
@@ -91,7 +108,9 @@ const Notes = memo(function ({
 
   useEffect(() => {
     const loadNotes = async () => {
-      const storageValue = await loadFromBrowserStorage(tabUrl);
+      const storageValue = await loadFromBrowserStorage(
+        tabUrl + username + pathname
+      );
       console.log("storageValue: ", storageValue);
       if (storageValue) {
         setNotes(storageValue);
@@ -129,3 +148,62 @@ const Notes = memo(function ({
 });
 
 export default Notes;
+
+async function sendNoteToQuix({
+  username,
+  note,
+  pathname,
+  pageUrl,
+}: {
+  username: string;
+  note: Note;
+  pathname: string;
+  pageUrl: string;
+}) {
+  // Replace these with your actual values
+  const token = "pat-9700c4e8e8df409c95c6a9e892bee992"; // Replace with your Quix token
+  const environmentId = "sherif-flashpath-dev"; // Replace with your environment ID
+  const topic = "raw-websocket"; // Replace with your topic name
+  const streamId = username || "sherif"; // Replace with your stream ID
+
+  const options = {
+    accessTokenFactory: () => token,
+    skipNegotiation: true,
+    transport: signalR.HttpTransportType.WebSockets,
+  };
+
+  const connection = new signalR.HubConnectionBuilder()
+    .withUrl(`https://writer-${environmentId}.platform.quix.io/hub`, options)
+    .configureLogging(signalR.LogLevel.Information)
+    .build();
+
+  // Establish connection
+  try {
+    await connection.start();
+    console.log("Connection started");
+    // Sample parameter data
+    const parameterData = {
+      epoch: Date.now() * 1000000, // set now as time starting point, in nanoseconds
+      timestamps: [Date.now() * 1000000],
+      numericValues: {},
+      stringValues: {
+        username: [username],
+        pathname: [pathname],
+        note: [JSON.stringify(note)],
+      },
+      tagValues: {
+        path: [window.location.pathname],
+      },
+      binaryValues: {},
+    };
+    // Send event data
+    console.log("Sending data...");
+    // send data to Quix
+    await connection.send("SendParameterData", topic, streamId, parameterData);
+    console.log("Data sent");
+  } catch (error) {
+    console.error("SignalR connection error:", error);
+  }
+
+  await connection.stop();
+}

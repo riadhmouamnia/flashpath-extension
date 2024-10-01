@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DbPage, MessageType, Path } from "@/entrypoints/types";
+import { DbPage, MessageType, Path, User } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
 import {
@@ -10,6 +10,7 @@ import {
 } from "@/lib/utils";
 import Notes from "@/components/shared/notes";
 import { useAuthContext } from "@/components/auth-privider";
+import CreatePathForm from "@/components/create-path-form";
 
 export default () => {
   const [url, setUrl] = useState(window.location.href);
@@ -17,13 +18,19 @@ export default () => {
   const [path, setPath] = useState<Path | null>(null);
   const [page, setPage] = useState<DbPage | null>(null);
   const { user } = useAuthContext();
-  const [pageKey, setPageKey] = useState<string | null>(null);
 
   useEffect(() => {
+    browser.storage.local.get().then((data) => {
+      console.log("storage:", data);
+    });
     const loadPath = async () => {
-      await browser.storage.local.get("path").then((data) => {
-        if (data.path) {
-          setPath(data.path);
+      if (!user) {
+        return;
+      }
+      await browser.storage.local.get(`${user.id}_path`).then((data) => {
+        console.log("path, data:", data);
+        if (data) {
+          setPath(data[`${user.id}_path`] as Path);
         }
       });
     };
@@ -43,12 +50,15 @@ export default () => {
         const newTheme = message.content;
         toggleTheme(newTheme);
         setThemeToBody(newTheme);
-      } else if (message.messageType === MessageType.CREATE_PATH) {
+      } else if (
+        message.messageType === MessageType.CREATE_PATH ||
+        message.messageType === MessageType.UPDATE_PATH
+      ) {
         setPath(message.data);
       }
       return true;
     });
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const initPageOnDb = async () => {
@@ -73,17 +83,30 @@ export default () => {
 
   return (
     <div className="h-screen">
-      <p>Logged in as {user.username}</p>
-      {path ? <p>path: {path.name}</p> : <p>path: no path found!</p>}
-      {/* <p>{url}</p>
-      <p>Generic.</p> */}
-      {page ? (
+      <p>Hello {user.username}!</p>
+      <CreatePathForm />
+      {path ? (
+        <p className="text-xs italic mt-1 text-primary/40">
+          You can now start recording for "{path.name}" path
+        </p>
+      ) : (
+        <p className="text-xs italic mt-1 text-red-400">
+          You need to create a path to start recoring
+        </p>
+      )}
+      {path?.name && page?.id ? (
         <>
-          <Notes tabUrl={url} pageId={page.id} />
+          <Notes
+            tabUrl={url}
+            pageId={page.id}
+            pathname={path.name}
+            username={user.username}
+          />
           <Interactions
             tabUrl={url}
             pageId={page.id}
-            pageKey={pageKey as string}
+            pathname={path.name}
+            username={user.username}
           />
         </>
       ) : null}

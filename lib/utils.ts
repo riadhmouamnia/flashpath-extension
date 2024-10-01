@@ -5,6 +5,8 @@ import {
   users,
   pages,
   rrwebEvents,
+  rrwebEventsWithChunks,
+  interactions,
 } from "./../server/db/schemas";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -169,14 +171,16 @@ export function formatVideoTime(seconds: number): string | null {
 export async function insertUserToDb({
   userId,
   username,
+  imageUrl,
 }: {
   userId: string;
   username: string;
+  imageUrl?: string;
 }) {
   try {
     const insertedUser = await db
       .insert(users)
-      .values({ id: userId, username })
+      .values({ id: userId, username, imageUrl })
       .onConflictDoNothing()
       .returning();
     console.log("User inserted", insertedUser[0]);
@@ -202,6 +206,29 @@ export async function insertPathToDb({
     return insertedPath[0];
   } catch (error) {
     console.error("Error inserting Path", error);
+  }
+}
+
+export async function updatePathOnDb({
+  name,
+  id,
+  userId,
+}: {
+  name: string;
+  id: number;
+  userId: string;
+}) {
+  try {
+    const updatedPath = await db
+      .update(paths)
+      .set({ name })
+      .where(eq(paths.id, id) && eq(paths.userId, userId))
+      .returning();
+
+    console.log("Path updated", updatedPath[0]);
+    return updatedPath[0];
+  } catch (error) {
+    console.error("Error updating Path", error);
   }
 }
 
@@ -243,10 +270,14 @@ export async function updatePageOnDb({
   pageId,
   page,
 }: {
-  pageId: number;
+  pageId?: number;
   page: Page;
 }) {
   try {
+    if (!pageId) {
+      console.log("No pageId provided to update page");
+      return;
+    }
     const updatedPage = await db
       .update(pages)
       .set({
@@ -261,31 +292,31 @@ export async function updatePageOnDb({
   }
 }
 
-// export async function insertInteractionsToDb({
-//   interaction,
-//   pageId,
-// }: {
-//   interaction: Interaction;
-//   pageId: number;
-// }) {
-//   try {
-//     const insertedInteractions = await db
-//       .insert(interactions)
-//       .values({ pageId, ...interaction })
-//       .returning();
-//     console.log("Interaction inserted", insertedInteractions[0]);
-//     return insertedInteractions[0];
-//   } catch (error) {
-//     console.error("Error inserting interactions", error);
-//   }
-// }
+export async function insertInteractionsToDb({
+  interaction,
+  pageId,
+}: {
+  interaction: Interaction;
+  pageId: number;
+}) {
+  try {
+    const insertedInteractions = await db
+      .insert(interactions)
+      .values({ pageId, ...interaction })
+      .returning();
+    console.log("Interaction inserted", insertedInteractions[0]);
+    return insertedInteractions[0];
+  } catch (error) {
+    console.error("Error inserting interactions", error);
+  }
+}
 
 export async function insertNotesToDb({
   note,
   pageId,
 }: {
   note: Note;
-  pageId: number;
+  pageId?: number;
 }) {
   try {
     const insertedNote = await db
@@ -308,6 +339,13 @@ export async function insertNotesToDb({
   }
 }
 
+type ChunckedEventType = {
+  chunkIndex: number;
+  totalChunks: number;
+  isChunked: boolean;
+  chunk: string;
+};
+
 export async function insertRrwebEventToDb({
   events,
   pageId,
@@ -324,4 +362,57 @@ export async function insertRrwebEventToDb({
   } catch (error) {
     console.error("Error inserting event", error);
   }
+}
+
+export async function insertRrwebChunksToDb({
+  events,
+  pageId,
+}: {
+  events: EventType[] | ChunckedEventType[];
+  pageId: number;
+}) {
+  try {
+    const insertedEvent = await db
+      .insert(rrwebEventsWithChunks)
+      .values(
+        events.map((event: any) => {
+          if ("isChunked" in event) {
+            // event is of type ChunckedEventType
+            return {
+              event: "CHUNK",
+              pageId,
+              chunkIndex: event.chunkIndex,
+              totalChunks: event.totalChunks,
+              isChunked: event.isChunked,
+              chunk: event.chunk,
+            };
+          } else {
+            // event is of type EventType
+            return {
+              pageId,
+              event,
+              isChunked: false,
+              chunk: null,
+              chunkIndex: null,
+              totalChunks: null,
+            };
+          }
+        })
+      )
+      .returning();
+    console.log("Event inserted", insertedEvent);
+  } catch (error) {
+    console.error("Error inserting event", error);
+  }
+}
+
+export function chunkSubstr(str: string, size: number) {
+  const numChunks = Math.ceil(str.length / size);
+  const chunks = new Array(numChunks);
+
+  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+    chunks[i] = str.slice(o, o + size);
+  }
+
+  return chunks;
 }

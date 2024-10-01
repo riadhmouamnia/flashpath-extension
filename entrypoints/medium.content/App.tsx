@@ -11,6 +11,7 @@ import {
 } from "@/lib/utils";
 import Notes from "@/components/shared/notes";
 import { useAuthContext } from "@/components/auth-privider";
+import CreatePathForm from "@/components/create-path-form";
 
 export default () => {
   const [url, setUrl] = useState(window.location.href);
@@ -92,17 +93,30 @@ export default () => {
 
   return (
     <div>
-      <p>Logged in as {user.username}</p>
-      {path ? <p>path: {path.name}</p> : <p>path: no path found!</p>}
-      {/* <p>{url}</p>
-      <p>Medium</p> */}
-      {page ? (
+      <p>Hello {user.username}!</p>
+      <CreatePathForm />
+      {path ? (
+        <p className="text-xs italic mt-1 text-primary/40">
+          You can now start recording for "{path.name}" path
+        </p>
+      ) : (
+        <p className="text-xs italic mt-1 text-red-400">
+          You need to create a path to start recoring
+        </p>
+      )}
+      {path?.name && page?.id ? (
         <>
-          <Notes tabUrl={url} pageId={page.id} />
+          <Notes
+            tabUrl={url}
+            pageId={page.id}
+            pathname={path.name}
+            username={user.username}
+          />
           <Interactions
             tabUrl={url}
             pageId={page.id}
-            pageKey={pageKey as string}
+            pathname={path.name}
+            username={user.username}
           />
         </>
       ) : null}

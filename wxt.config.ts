@@ -4,11 +4,12 @@ import react from "@vitejs/plugin-react";
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   manifest: {
-    permissions: ["bookmarks", "storage", "cookies", "webNavigation"],
+    permissions: ["bookmarks", "storage", "cookies"],
     host_permissions: [
-      "http://localhost:3000/*",
+      "https://flashpath-frontend.vercel.app/*",
       "https://clerk.profyx.io/*",
       "https://clerk.com/*",
+      // "*//foo.clerk.accounts.dev/*",
     ],
     // name: "__MSG_extName__",
     // description: "__MSG_extDescription__",
@@ -23,7 +24,7 @@ export default defineConfig({
       "https://github.com/riadhmouamnia",
       // "https://medium.com/",
       // "https://www.youtube.com/watch?v=9noryYsLaiQ&t=3s&ab_channel=Requestly",
-      "http://localhost:3000",
+      // "https://flashpath-frontend.vercel.app/",
     ],
   },
 });
