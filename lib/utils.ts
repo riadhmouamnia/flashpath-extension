@@ -325,7 +325,7 @@ export async function insertNotesToDb({
         pageId,
         startTime: note.startTime,
         endTime: note.endTime,
-        body: note.note,
+        body: note.body,
         tags: note.tags?.map((tag: Tag) => tag.text),
         color: note.highlightColor,
         sort: note.sort,

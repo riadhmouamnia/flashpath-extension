@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Tag } from "emblor";
-import { Note } from "@/entrypoints/types";
+import ExtMessage, { MessageType, Note } from "@/entrypoints/types";
 import {
   insertNotesToDb,
   loadFromBrowserStorage,
@@ -87,8 +87,8 @@ const YTNotes = memo(function ({
     if (!form) {
       return;
     }
-    const note = form.querySelector<HTMLTextAreaElement>("#note-input")?.value;
-    if (!note) {
+    const body = form.querySelector<HTMLTextAreaElement>("#note-input")?.value;
+    if (!body) {
       return;
     }
     const newEndTime =
@@ -100,7 +100,7 @@ const YTNotes = memo(function ({
         {
           startTime,
           endTime: newEndTime,
-          note,
+          body,
           tags,
           highlightColor,
           createdAt: Date.now(),
@@ -110,7 +110,7 @@ const YTNotes = memo(function ({
       ];
       insertNotesToDb({
         note: {
-          note,
+          body,
           tags,
           highlightColor,
           sort: prev.length + 1,
@@ -163,6 +163,43 @@ const YTNotes = memo(function ({
     };
     loadNotes();
   }, [tabUrl]);
+  useEffect(() => {
+    browser.runtime.onMessage.addListener(
+      (message: ExtMessage, sender, sendResponse) => {
+        console.log("notes:");
+        console.log(message);
+        if (message.messageType === MessageType.SELECT_TEXT) {
+          if (!username || !pathname || !tabUrl) return;
+          setNotes((prev) => {
+            const updatedNotes = [
+              {
+                body: message.data.selectionText,
+                tags: [{ id: "1", text: "selection" }],
+                highlightColor,
+                createdAt: Date.now(),
+                sort: prev.length + 1,
+              },
+              ...prev,
+            ];
+            void insertNotesToDb({
+              note: {
+                body: message.data.selectionText,
+                tags: [{ id: "1", text: "selection" }],
+                highlightColor,
+                sort: prev.length + 1,
+              },
+              pageId,
+            } as any);
+            void saveToBrowserStorage({
+              key: tabUrl + username + pathname,
+              value: updatedNotes,
+            });
+            return updatedNotes;
+          });
+        }
+      }
+    );
+  }, []);
 
   return (
     <div className="my-4 flex flex-col gap-2">

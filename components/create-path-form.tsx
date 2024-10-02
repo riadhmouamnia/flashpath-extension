@@ -46,7 +46,7 @@ export default function CreatePathForm() {
       if (data[`${user.id}_path`]) {
         setSavedPath(data[`${user.id}_path`].name); // Load saved path
         setInputValue(data[`${user.id}_path`].name);
-        inputRef.current!.value = data.path.name; // Set the input value
+        inputRef.current!.value = data[`${user.id}_path`].name; // Set the input value
         setIsEditing(false); // Disable editing mode
       }
     };
