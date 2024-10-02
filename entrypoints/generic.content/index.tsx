@@ -11,7 +11,7 @@ export default defineContentScript({
   excludeMatches: [
     "*://www.youtube.com/*",
     "*://medium.com/*",
-    "http://localhost:3000/*",
+    "*://flashpath-frontend.vercel.app/*",
   ],
   cssInjectionMode: "ui",
 

@@ -1,6 +1,6 @@
 {
-  "id": "6c9ad95b-384f-4236-bd99-43cf0a96f20a",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "223ef6d6-fb81-4040-b7c4-1298a040ea66",
+  "prevId": "00c3b8d7-d875-477c-9093-ae02641d0e53",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
@@ -286,6 +286,73 @@
           "type": "json",
           "primaryKey": false,
           "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "rrweb_events_page_id_pages_id_fk": {
+          "name": "rrweb_events_page_id_pages_id_fk",
+          "tableFrom": "rrweb_events",
+          "tableTo": "pages",
+          "columnsFrom": [
+            "page_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.rrweb_events_with_chunks": {
+      "name": "rrweb_events_with_chunks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "page_id": {
+          "name": "page_id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event": {
+          "name": "event",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "chunk": {
+          "name": "chunk",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "chunk_index": {
+          "name": "chunk_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_chunks": {
+          "name": "total_chunks",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_chunked": {
+          "name": "is_chunked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "created_at": {
           "name": "created_at",
@@ -297,9 +364,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "rrweb_events_page_id_pages_id_fk": {
-          "name": "rrweb_events_page_id_pages_id_fk",
-          "tableFrom": "rrweb_events",
+        "rrweb_events_with_chunks_page_id_pages_id_fk": {
+          "name": "rrweb_events_with_chunks_page_id_pages_id_fk",
+          "tableFrom": "rrweb_events_with_chunks",
           "tableTo": "pages",
           "columnsFrom": [
             "page_id"

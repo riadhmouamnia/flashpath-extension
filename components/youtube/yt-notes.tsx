@@ -20,10 +20,14 @@ const YTNotes = memo(function ({
   tabUrl,
   videoId,
   pageId,
+  username,
+  pathname,
 }: {
   tabUrl: string;
   videoId: string;
   pageId: number;
+  username: string;
+  pathname: string;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -114,7 +118,7 @@ const YTNotes = memo(function ({
         pageId,
       } as any);
       void saveToBrowserStorage({
-        key: tabUrl,
+        key: tabUrl + username + pathname,
         value: updatedNotes,
       });
       return updatedNotes;
@@ -147,7 +151,9 @@ const YTNotes = memo(function ({
 
   useEffect(() => {
     const loadNotes = async () => {
-      const storageValue = await loadFromBrowserStorage(tabUrl);
+      const storageValue = await loadFromBrowserStorage(
+        tabUrl + username + pathname
+      );
       console.log("storageValue: ", storageValue);
       if (storageValue) {
         setNotes(storageValue);

@@ -9,7 +9,7 @@ import {
 import { updatePageOnDb } from "@/lib/utils";
 import { useEffect, useRef, useReducer, useState } from "react";
 
-const initializeUrlState = (url: string) => ({
+const initializePageState = (url: string): Page => ({
   url,
   domain: new URL(url).hostname,
   timeOnPage: 0,
@@ -25,14 +25,7 @@ type Action = {
   payload: any;
 };
 
-type State = {
-  url: string;
-  domain: string;
-  timeOnPage: number;
-  isBookmarked: boolean;
-};
-
-const reducer = (state: State, action: Action) => {
+const reducer = (state: Page, action: Action): Page => {
   switch (action.type) {
     case "UPDATE_PAGE":
       return {
@@ -49,11 +42,11 @@ export default function usePageInteractions({
   pageId,
 }: {
   tabUrl: string;
-  pageId: number;
+  pageId?: number;
 }) {
-  const [urlInteractions, dispatch] = useReducer(
+  const [pageState, dispatch] = useReducer(
     reducer,
-    initializeUrlState(tabUrl)
+    initializePageState(tabUrl)
   );
   const urlRef = useRef(tabUrl);
   const startTime = useRef(Date.now());
@@ -73,7 +66,7 @@ export default function usePageInteractions({
       updatePageOnDb({
         pageId,
         page: {
-          ...urlInteractions,
+          ...pageState,
           timeOnPage: totalTimeSpent.current,
         },
       });
@@ -87,7 +80,7 @@ export default function usePageInteractions({
     if (isActive.current) {
       const timeSpent = Date.now() - startTime.current;
       totalTimeSpent.current += timeSpent;
-      const prevTimeSpent = urlInteractions.timeOnPage;
+      const prevTimeSpent = pageState.timeOnPage;
       const newTotalTimeSpent = prevTimeSpent + totalTimeSpent.current;
       dispatch({
         type: ActionType.UPDATE_PAGE,
@@ -96,7 +89,7 @@ export default function usePageInteractions({
       updatePageOnDb({
         pageId,
         page: {
-          ...urlInteractions,
+          ...pageState,
           timeOnPage: newTotalTimeSpent,
         },
       });
@@ -117,7 +110,7 @@ export default function usePageInteractions({
       });
       updatePageOnDb({
         pageId,
-        page: { ...urlInteractions, isBookmarked: true },
+        page: { ...pageState, isBookmarked: true },
       });
     } else if (messageType === MessageType.BOOKMARK_REMOVED) {
       dispatch({
@@ -126,7 +119,7 @@ export default function usePageInteractions({
       });
       updatePageOnDb({
         pageId,
-        page: { ...urlInteractions, isBookmarked: false },
+        page: { ...pageState, isBookmarked: false },
       });
     }
   };
@@ -148,7 +141,7 @@ export default function usePageInteractions({
   useEffect(() => {
     const oldUrl = urlRef.current;
     const newUrl = tabUrl;
-    const prevTimeSpent = urlInteractions.timeOnPage;
+    const prevTimeSpent = pageState.timeOnPage;
 
     const handleUrlChange = async () => {
       if (oldUrl !== newUrl) {
@@ -169,7 +162,7 @@ export default function usePageInteractions({
           updatePageOnDb({
             pageId,
             page: {
-              ...urlInteractions,
+              ...pageState,
               timeOnPage: prevTimeSpent
                 ? prevTimeSpent + totalTimeSpent.current
                 : totalTimeSpent.current,
@@ -187,5 +180,5 @@ export default function usePageInteractions({
     handleUrlChange();
   }, [tabUrl]);
 
-  return { urlInteractions };
+  return { pageState };
 }

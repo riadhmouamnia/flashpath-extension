@@ -1,6 +1,6 @@
 {
-  "id": "6c9ad95b-384f-4236-bd99-43cf0a96f20a",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "00c3b8d7-d875-477c-9093-ae02641d0e53",
+  "prevId": "6c9ad95b-384f-4236-bd99-43cf0a96f20a",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
@@ -285,7 +285,32 @@
           "name": "event",
           "type": "json",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "chunk": {
+          "name": "chunk",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "chunk_index": {
+          "name": "chunk_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_chunks": {
+          "name": "total_chunks",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_chunked": {
+          "name": "is_chunked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "created_at": {
           "name": "created_at",
