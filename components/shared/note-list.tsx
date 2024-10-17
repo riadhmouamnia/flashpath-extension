@@ -21,9 +21,9 @@ export default function NoteList({ notes }: { notes: Note[] }) {
                 month: "short",
               })}
               :{" "}
-              {note.note.length > 28
-                ? note.note.slice(0, 28) + "..."
-                : note.note}
+              {note.body.length > 28
+                ? note.body.slice(0, 28) + "..."
+                : note.body}
             </p>
             {note.tags?.length ? (
               <p className="flex gap-1 text-xs items-center justify-start flex-wrap pl-2">

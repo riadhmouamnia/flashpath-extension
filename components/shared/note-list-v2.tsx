@@ -20,7 +20,7 @@ export default function NoteListV2({ notes }: { notes: Note[] }) {
     setFilteredNotes(
       notes.filter(
         (note) =>
-          note.note.toLowerCase().includes(search.toLowerCase()) ||
+          note.body.toLowerCase().includes(search.toLowerCase()) ||
           note.tags?.some((tag) =>
             tag.text.toLowerCase().includes(search.toLowerCase())
           )
@@ -100,9 +100,9 @@ export default function NoteListV2({ notes }: { notes: Note[] }) {
           </CardHeader>
           <CardContent className="text-sm font-light p-4 pt-0">
             <p>
-              {note.note.length > 28
-                ? note.note.slice(0, 100) + "..."
-                : note.note}
+              {note.body.length > 28
+                ? note.body.slice(0, 100) + "..."
+                : note.body}
             </p>
           </CardContent>
         </Card>

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { DbPage, MessageType, Path, User } from "@/entrypoints/types";
+import ExtMessage, {
+  DbPage,
+  MessageType,
+  Path,
+  User,
+} from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
-import {
-  initializePage,
-  insertPageToDb,
-  saveToBrowserStorage,
-  setThemeToBody,
-} from "@/lib/utils";
+import { initializePage, insertPageToDb, setThemeToBody } from "@/lib/utils";
 import Notes from "@/components/shared/notes";
 import { useAuthContext } from "@/components/auth-privider";
 import CreatePathForm from "@/components/create-path-form";
@@ -28,7 +28,7 @@ export default () => {
         return;
       }
       await browser.storage.local.get(`${user.id}_path`).then((data) => {
-        console.log("path, data:", data);
+        console.log("path, data:", data[`${user.id}_path`]);
         if (data) {
           setPath(data[`${user.id}_path`] as Path);
         }
@@ -37,27 +37,29 @@ export default () => {
 
     loadPath();
 
-    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log("content:");
-      console.log(message);
-      if (message.messageType == MessageType.TAB_CHANGE) {
-        const tabUrl = message.data.url;
-        setUrl(tabUrl);
-      } else if (message.messageType === MessageType.URL_CHANGE) {
-        const url = message.data.url;
-        setUrl(url);
-      } else if (message.messageType === MessageType.CHANGE_THEME) {
-        const newTheme = message.content;
-        toggleTheme(newTheme);
-        setThemeToBody(newTheme);
-      } else if (
-        message.messageType === MessageType.CREATE_PATH ||
-        message.messageType === MessageType.UPDATE_PATH
-      ) {
-        setPath(message.data);
+    browser.runtime.onMessage.addListener(
+      (message: ExtMessage, sender, sendResponse) => {
+        console.log("content:");
+        console.log(message);
+        if (message.messageType == MessageType.TAB_CHANGE) {
+          const tabUrl = message.data.url;
+          setUrl(tabUrl);
+        } else if (message.messageType === MessageType.URL_CHANGE) {
+          const url = message.data.url;
+          setUrl(url);
+        } else if (message.messageType === MessageType.CHANGE_THEME) {
+          const newTheme = message.content!;
+          toggleTheme(newTheme);
+          setThemeToBody(newTheme);
+        } else if (
+          message.messageType === MessageType.CREATE_PATH ||
+          message.messageType === MessageType.UPDATE_PATH
+        ) {
+          setPath(message.data);
+        }
+        return true;
       }
-      return true;
-    });
+    );
   }, [user]);
 
   useEffect(() => {

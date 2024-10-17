@@ -12,6 +12,7 @@ export enum MessageType {
   USER_LOGGED_OUT = "USER_LOGGED_OUT",
   CREATE_PATH = "CREATE_PATH",
   UPDATE_PATH = "UPDATE_PATH",
+  SELECT_TEXT = "SELECT_TEXT",
 }
 
 export enum MessageFrom {
@@ -132,7 +133,7 @@ export interface UrlState {
 export type Note = {
   startTime?: number;
   endTime?: number;
-  note: string;
+  body: string;
   tags?: Tag[];
   highlightColor?: string;
   sort: number;

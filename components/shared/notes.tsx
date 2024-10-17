@@ -4,7 +4,7 @@ import { Tag } from "emblor";
 import ShowNotesButton from "./show-notes-button";
 import AddNoteButton from "./add-note-button";
 import ShareButton from "./share-button";
-import { Note } from "@/entrypoints/types";
+import ExtMessage, { MessageType, Note } from "@/entrypoints/types";
 import {
   insertNotesToDb,
   loadFromBrowserStorage,
@@ -58,14 +58,14 @@ const Notes = memo(function ({
     if (!form) {
       return;
     }
-    const note = form.querySelector<HTMLTextAreaElement>("#note-input")?.value;
-    if (!note) {
+    const body = form.querySelector<HTMLTextAreaElement>("#note-input")?.value;
+    if (!body) {
       return;
     }
     setNotes((prev) => {
       const updatedNotes = [
         {
-          note,
+          body,
           tags,
           highlightColor,
           createdAt: Date.now(),
@@ -87,7 +87,7 @@ const Notes = memo(function ({
       // });
       insertNotesToDb({
         note: {
-          note,
+          body,
           tags,
           highlightColor,
           sort: prev.length + 1,
@@ -111,7 +111,6 @@ const Notes = memo(function ({
       const storageValue = await loadFromBrowserStorage(
         tabUrl + username + pathname
       );
-      console.log("storageValue: ", storageValue);
       if (storageValue) {
         setNotes(storageValue);
       } else {
@@ -120,6 +119,44 @@ const Notes = memo(function ({
     };
     loadNotes();
   }, [tabUrl]);
+
+  useEffect(() => {
+    browser.runtime.onMessage.addListener(
+      (message: ExtMessage, sender, sendResponse) => {
+        console.log("notes:");
+        console.log(message);
+        if (message.messageType === MessageType.SELECT_TEXT) {
+          if (!username || !pathname || !tabUrl) return;
+          setNotes((prev) => {
+            const updatedNotes = [
+              {
+                body: message.data.selectionText,
+                tags: [{ id: "1", text: "selection" }],
+                highlightColor,
+                createdAt: Date.now(),
+                sort: prev.length + 1,
+              },
+              ...prev,
+            ];
+            void insertNotesToDb({
+              note: {
+                body: message.data.selectionText,
+                tags: [{ id: "1", text: "selection" }],
+                highlightColor,
+                sort: prev.length + 1,
+              },
+              pageId,
+            } as any);
+            void saveToBrowserStorage({
+              key: tabUrl + username + pathname,
+              value: updatedNotes,
+            });
+            return updatedNotes;
+          });
+        }
+      }
+    );
+  }, []);
 
   return (
     <div className="my-4 flex flex-col gap-2">

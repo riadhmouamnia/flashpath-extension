@@ -4,12 +4,11 @@ import react from "@vitejs/plugin-react";
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   manifest: {
-    permissions: ["bookmarks", "storage", "cookies"],
+    permissions: ["bookmarks", "storage", "cookies", "contextMenus"],
     host_permissions: [
       "https://flashpath-frontend.vercel.app/*",
       "https://clerk.profyx.io/*",
       "https://clerk.com/*",
-      // "*//foo.clerk.accounts.dev/*",
     ],
     // name: "__MSG_extName__",
     // description: "__MSG_extDescription__",

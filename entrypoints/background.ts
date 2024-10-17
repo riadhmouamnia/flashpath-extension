@@ -193,6 +193,24 @@ export default defineBackground(() => {
     }
   );
 
+  // create context menu item for page selection
+  browser.contextMenus.create({
+    id: "text-selection",
+    title: "Add to Flashpath notes",
+    contexts: ["selection"],
+  });
+
+  // listen for context menu click
+  browser.contextMenus.onClicked.addListener((info, tab) => {
+    console.log("context menu click");
+    console.log(info);
+    console.log(tab);
+    browser.tabs.sendMessage(tab!.id!, {
+      messageType: MessageType.SELECT_TEXT,
+      data: { selectionText: info.selectionText },
+    });
+  });
+
   // listen for extension icon click, you need to add action {} in manifest.json (wxt.config.ts) for this to work
   // browser.action.onClicked.addListener((tab) => {
   //   console.log("click icon");
