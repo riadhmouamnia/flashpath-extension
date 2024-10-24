@@ -8,6 +8,7 @@ import {
   rrwebEventsWithChunks,
   interactions,
 } from "./../server/db/schemas";
+import flashpathIcon from "/icon96.png";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import {
@@ -86,7 +87,7 @@ export const clearBrowserStorage = async (key: string) => {
 };
 
 export const setThemeToBody = (theme: string) => {
-  const element = document.querySelector("wxt-react-example");
+  const element = document.querySelector("flashpath-extension");
   if (element) {
     const shadowRoot = element.shadowRoot;
     if (shadowRoot) {
@@ -99,7 +100,7 @@ export const setThemeToBody = (theme: string) => {
 };
 
 export const toggle = () => {
-  const element = document.querySelector("wxt-react-example");
+  const element = document.querySelector("flashpath-extension");
   if (element) {
     const shadowRoot = element.shadowRoot;
     if (shadowRoot) {
@@ -125,7 +126,7 @@ export const toggle = () => {
 };
 
 export const showUi = () => {
-  const element = document.querySelector("wxt-react-example");
+  const element = document.querySelector("flashpath-extension");
   if (element) {
     const shadowRoot = element.shadowRoot;
     if (shadowRoot) {
@@ -136,11 +137,15 @@ export const showUi = () => {
       // change right: to 0px
       body.style.right = "0px";
       body.style.display = "block";
+      saveToBrowserStorage({
+        key: "hideUi",
+        value: false,
+      });
     }
   }
 };
 export const hideUi = () => {
-  const element = document.querySelector("wxt-react-example");
+  const element = document.querySelector("flashpath-extension");
   if (element) {
     const shadowRoot = element.shadowRoot;
     if (shadowRoot) {
@@ -151,6 +156,35 @@ export const hideUi = () => {
       // change right: to -600px
       body.style.right = "-600px";
       body.style.display = "none";
+
+      const container = document.createElement("div");
+      const text = document.createTextNode("Show flashpath side panel");
+      container.append(text);
+      container.style.cssText = `
+      position: fixed;
+      font-size: 14px !important;
+      top: 80px;
+      right: -170px;
+      z-index: 9999999999;
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      background-color: #333;
+      color: #fff;
+      transition: right 0.3s ease-in-out;
+      `;
+      container.onmouseover = () => {
+        container.style.right = "4px";
+      };
+      container.onmouseleave = () => {
+        container.style.right = "-170px";
+      };
+      container.addEventListener("click", () => {
+        showUi();
+        container.remove();
+      });
+      document.body.prepend(container);
     }
   }
 };

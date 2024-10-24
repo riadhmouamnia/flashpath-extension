@@ -2,19 +2,33 @@ import ToggleThemeButton from "@/components/toggle-theme";
 import { MessageType, Network } from "@/entrypoints/types";
 import { Button } from "./ui/button";
 import { CgArrowsShrinkH } from "react-icons/cg";
-import { hideUi } from "@/lib/utils";
+import {
+  hideUi,
+  loadFromBrowserStorage,
+  saveToBrowserStorage,
+  showUi,
+} from "@/lib/utils";
 import useNetworkState from "@/hooks/useNetworkState";
 import { CiWifiOn, CiWifiOff } from "react-icons/ci";
+import { useEffect, useState } from "react";
 
 export default function Header() {
   const network = useNetworkState() as Network;
+
+  const handleHideUi = () => {
+    browser.runtime.sendMessage({
+      messageType: MessageType.HIDE_UI,
+    });
+    saveToBrowserStorage({
+      key: "hideUi",
+      value: true,
+    });
+  };
   return (
     <header className="w-full flex justify-end items-center">
       <ToggleThemeButton />
       <Button
-        onClick={() => {
-          hideUi();
-        }}
+        onClick={handleHideUi}
         size="icon"
         variant="ghost"
         className="font-light"

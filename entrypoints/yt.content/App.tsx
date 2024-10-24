@@ -6,13 +6,15 @@ import { useTheme } from "@/components/theme-provider";
 import {
   initializePage,
   insertPageToDb,
-  saveToBrowserStorage,
+  loadFromBrowserStorage,
   setThemeToBody,
 } from "@/lib/utils";
 import YTNotes from "@/components/youtube/yt-notes";
 import Notes from "@/components/shared/notes";
 import { useAuthContext } from "@/components/auth-privider";
 import CreatePathForm from "@/components/create-path-form";
+import useRRWEBRecorder from "@/hooks/useRRWEBRecorder";
+import { Runtime } from "wxt/browser";
 
 export default () => {
   const [url, setUrl] = useState(window.location.href);
@@ -21,7 +23,8 @@ export default () => {
   const [path, setPath] = useState<Path | null>(null);
   const [page, setPage] = useState<DbPage | null>(null);
   const { user } = useAuthContext();
-  const [pageKey, setPageKey] = useState<string | null>(null);
+  const [isPathOn, setIsPathOn] = useState<boolean>(false);
+  useRRWEBRecorder({ pageId: page?.id, isPathOn });
 
   useEffect(() => {
     const initPageOnDb = async () => {
@@ -51,32 +54,57 @@ export default () => {
       });
     };
 
-    loadPath();
-
-    browser.runtime.onMessage.addListener(
-      (message: ExtMessage, sender, sendResponse) => {
-        console.log("content:");
-        console.log(message);
-        if (message.messageType === MessageType.TAB_CHANGE) {
-          const tabUrl = message.data.url;
-          setUrl(tabUrl);
-        } else if (message.messageType === MessageType.URL_CHANGE) {
-          const url = message.data.url;
-          setUrl(url);
-        } else if (message.messageType === MessageType.CHANGE_THEME) {
-          const newTheme = message.content!;
-          toggleTheme(newTheme);
-          setThemeToBody(newTheme);
-        } else if (message.messageType === MessageType.CREATE_PATH) {
-          setPath(message.data);
-        } else if (message.messageType === MessageType.YT_VIDEO_ID) {
-          setYtVideoId(message.data.videoId);
-        }
+    const loadPathStatus = async () => {
+      const storageValue = await loadFromBrowserStorage("isPathOn");
+      if (storageValue === true) {
+        setIsPathOn(true);
+      } else {
+        setIsPathOn(false);
       }
-    );
+    };
+
+    const handleMessage = async (
+      message: ExtMessage,
+      sender: Runtime.MessageSender,
+      sendResponse: () => void
+    ) => {
+      console.log("content:");
+      console.log(message);
+      if (message.messageType === MessageType.TAB_CHANGE) {
+        const tabUrl = message.data.url;
+        setUrl(tabUrl);
+      } else if (message.messageType === MessageType.URL_CHANGE) {
+        const url = message.data.url;
+        setUrl(url);
+      } else if (message.messageType === MessageType.CHANGE_THEME) {
+        const newTheme = message.content!;
+        toggleTheme(newTheme);
+        setThemeToBody(newTheme);
+      } else if (
+        message.messageType === MessageType.CREATE_PATH ||
+        message.messageType === MessageType.UPDATE_PATH
+      ) {
+        setPath(message.data);
+      } else if (message.messageType === MessageType.YT_VIDEO_ID) {
+        setYtVideoId(message.data.videoId);
+      } else if (message.messageType === MessageType.PATH_ON) {
+        setIsPathOn(message.data);
+      } else if (message.messageType === MessageType.PATH_OFF) {
+        setIsPathOn(message.data);
+      }
+    };
+
+    loadPath();
+    loadPathStatus();
+    browser.runtime.onMessage.addListener(handleMessage);
+
+    return () => {
+      browser.runtime.onMessage.removeListener(handleMessage);
+    };
   }, []);
 
   useEffect(() => {
+    if (!isPathOn) return;
     const initPageOnDb = async () => {
       if (!path) return;
       try {
@@ -93,7 +121,7 @@ export default () => {
     };
 
     initPageOnDb();
-  }, [path, url]);
+  }, [path, url, isPathOn]);
 
   if (!user) return;
 
@@ -107,10 +135,10 @@ export default () => {
         </p>
       ) : (
         <p className="text-xs italic mt-1 text-red-400">
-          You need to create a path to start recoring
+          You need to create a path to start recording
         </p>
       )}
-      {path?.name && page?.id ? (
+      {isPathOn && path?.name && page?.id ? (
         <>
           {ytVideoId ? (
             <YTNotes
@@ -128,12 +156,7 @@ export default () => {
               username={user.username}
             />
           )}
-          <Interactions
-            tabUrl={url}
-            pageId={page.id}
-            pathname={path.name}
-            username={user.username}
-          />
+          <Interactions tabUrl={url} pageId={page.id} />
         </>
       ) : null}
     </div>

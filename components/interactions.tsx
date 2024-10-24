@@ -36,59 +36,16 @@ const theme = {
 export default function Interactions({
   tabUrl,
   pageId,
-  pathname,
-  username,
 }: {
   tabUrl: string;
   pageId: number;
-  pathname: string;
-  username: string;
 }) {
   const { pageState } = usePageInteractions({ tabUrl, pageId });
-
-  // const { isRecording, startRecording, stopRecording } = useRRWEBRecorder({
-  //   pageId,
-  //   pageUrl: tabUrl,
-  //   username,
-  //   pathname,
-  //   pageState,
-  // });
-  const { isRecording, startRecording, stopRecording } = useRRWEBRecorder({
-    pageId,
-  });
-
   return (
-    <>
-      <div className="flex items-center justify-between my-4">
-        {isRecording ? (
-          <Button
-            onClick={stopRecording}
-            className="flex items-center gap-1"
-            variant="ghost"
-          >
-            <TbPointerPause className="text-xl" /> Pause Recording
-          </Button>
-        ) : (
-          <Button
-            onClick={startRecording}
-            className="flex items-center gap-1"
-            variant="ghost"
-          >
-            <LuMousePointerClick className="text-xl" /> Start Recording
-          </Button>
-        )}
-
-        {isRecording ? (
-          <BsFillRecord2Fill className="text-red-500 animate-pulse text-xl" />
-        ) : (
-          <BsFillRecord2Fill className="text-secondary text-xl" />
-        )}
+    <Card className="max-h-[340px] h-fit overflow-y-scroll border-none">
+      <div id="json-tree">
+        <JSONTree data={pageState} theme={theme} invertTheme={false} />
       </div>
-      <Card className="max-h-[340px] h-fit overflow-y-scroll border-none">
-        <div id="json-tree">
-          <JSONTree data={pageState} theme={theme} invertTheme={false} />
-        </div>
-      </Card>
-    </>
+    </Card>
   );
 }
