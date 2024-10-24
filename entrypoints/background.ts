@@ -131,8 +131,6 @@ export default defineBackground(() => {
       sender,
       sendResponse: (message: any) => void
     ) => {
-      console.log("background:");
-      console.log(message);
       if (message.messageType === MessageType.USER_LOGGED_IN) {
         let tabs = await browser.tabs.query({});
         await browser.storage.local.set({
@@ -154,7 +152,7 @@ export default defineBackground(() => {
           }
         }
       }
-      return true;
+      // return true;
     }
   );
 
@@ -165,8 +163,6 @@ export default defineBackground(() => {
       sender,
       sendResponse: (message: any) => void
     ) => {
-      console.log("background:");
-      console.log(message);
       if (message.messageType === MessageType.CREATE_PATH) {
         console.log("key: ", message.data.userId + "_path");
         await saveToBrowserStorage({
@@ -187,6 +183,75 @@ export default defineBackground(() => {
                 console.error(err);
               });
           }
+        }
+      }
+      return true;
+    }
+  );
+
+  // listen for path on/off
+  browser.runtime.onMessage.addListener(
+    async (
+      message: ExtMessage,
+      sender,
+      sendResponse: (message: any) => void
+    ) => {
+      // Path ON
+      if (
+        message.messageType === MessageType.PATH_ON ||
+        message.messageType === MessageType.PATH_OFF
+      ) {
+        let tabs = await browser.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+        console.log(message);
+        if (tabs.length > 0 && tabs[0].id) {
+          browser.tabs.sendMessage(tabs[0].id, message);
+        }
+      }
+      return true;
+    }
+  );
+
+  // listen for video on/off
+  browser.runtime.onMessage.addListener(
+    async (
+      message: ExtMessage,
+      sender,
+      sendResponse: (message: any) => void
+    ) => {
+      // Video ON
+      if (
+        message.messageType === MessageType.CAPTURE_VIDEO_ON ||
+        message.messageType === MessageType.CAPTURE_VIDEO_OFF
+      ) {
+        let tabs = await browser.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+        if (tabs.length > 0 && tabs[0].id) {
+          browser.tabs.sendMessage(tabs[0].id, message);
+        }
+      }
+      return true;
+    }
+  );
+
+  // listen for hideUI message
+  browser.runtime.onMessage.addListener(
+    async (
+      message: ExtMessage,
+      sender,
+      sendResponse: (message: any) => void
+    ) => {
+      if (message.messageType === MessageType.HIDE_UI) {
+        let tabs = await browser.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+        if (tabs.length > 0 && tabs[0].id) {
+          browser.tabs.sendMessage(tabs[0].id, message);
         }
       }
       return true;

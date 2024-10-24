@@ -4,7 +4,6 @@ import { MessageType } from "@/entrypoints/types";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Path } from "@/entrypoints/types";
 import { Label } from "./ui/label";
 
 export default function CreatePathForm() {
@@ -77,7 +76,7 @@ export default function CreatePathForm() {
           id="path"
           name="path"
           type="text"
-          placeholder="Enter a path..."
+          placeholder="path name..."
           value={inputValue}
           onChange={handleInputChange}
           disabled={!isEditing && !!savedPath} // Disable input if not editing and there's a saved path
@@ -99,7 +98,7 @@ export default function CreatePathForm() {
           className="flex text-xs tracking-wider items-center justify-center absolute disabled:bg-neutral-850 disabled:text-neutral-600 right-1 top-1 h-7"
           disabled={!savedPath || isEditing} // Disable Edit if there's no saved path or already editing
         >
-          Edit
+          New
         </Button>
       </div>
     </form>

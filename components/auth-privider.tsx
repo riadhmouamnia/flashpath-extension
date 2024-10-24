@@ -1,5 +1,5 @@
-import { MessageType, User } from "@/entrypoints/types";
-import { hideUi, showUi } from "@/lib/utils";
+import ExtMessage, { MessageType, User } from "@/entrypoints/types";
+import { hideUi, loadFromBrowserStorage, showUi } from "@/lib/utils";
 import React, {
   createContext,
   useState,
@@ -7,6 +7,7 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
+import { Runtime } from "wxt/browser";
 
 const AuthContext = createContext({ user: null } as { user: User | null });
 
@@ -18,33 +19,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // send message to background script when first load to check if we have a user
     async function loadUser() {
-      await browser.storage.local.get("user").then((data) => {
+      await browser.storage.local.get("user").then(async (data) => {
         console.log("user in auth context:", data.user);
         if (data.user) {
           setUser(data.user as User);
-          showUi();
+          // showUi();
+          const isHideUi = await loadFromBrowserStorage("hideUi");
+          console.log("isHideUi auth provider: ", isHideUi);
+          if (isHideUi) {
+            hideUi();
+          } else {
+            showUi();
+          }
         } else {
-          hideUi();
+          // hideUi();
         }
       });
     }
 
     loadUser();
 
-    browser.runtime.onMessage.addListener(
-      async (message, sender, sendResponse) => {
-        console.log("content:");
-        console.log(message);
-        if (message.messageType === MessageType.USER_LOGGED_IN) {
-          setUser(message.data);
-          showUi();
-        } else if (message.messageType === MessageType.USER_LOGGED_OUT) {
-          setUser(null);
-          hideUi();
-        }
-        return true;
+    const handleMessages = async (
+      message: ExtMessage,
+      sender: Runtime.MessageSender,
+      sendResponse: () => void
+    ) => {
+      if (message.messageType === MessageType.USER_LOGGED_IN) {
+        setUser(message.data);
+        showUi();
+      } else if (message.messageType === MessageType.USER_LOGGED_OUT) {
+        setUser(null);
+        // hideUi();
+      } else if (message.messageType === MessageType.HIDE_UI) {
+        hideUi();
       }
-    );
+      return true;
+    };
+
+    browser.runtime.onMessage.addListener(handleMessages);
+
+    return () => {
+      browser.runtime.onMessage.removeListener(handleMessages);
+    };
   }, []);
 
   if (!user) {

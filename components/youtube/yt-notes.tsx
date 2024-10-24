@@ -12,6 +12,7 @@ import ShareButton from "../shared/share-button";
 import NoteForm from "../shared/note-form";
 import NoteListV2 from "../shared/note-list-v2";
 import PlayPause from "./play-pause-button";
+import { Runtime } from "wxt/browser";
 
 const userId = 123;
 const pathId = 123456;
@@ -32,7 +33,7 @@ const YTNotes = memo(function ({
   const formRef = useRef<HTMLFormElement>(null);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
-  const [showNotes, setShowNotes] = useState(true);
+  const [showNotes, setShowNotes] = useState(false);
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [highlightColor, setHighlightColor] = useState<string>("#56C880");
@@ -164,41 +165,48 @@ const YTNotes = memo(function ({
     loadNotes();
   }, [tabUrl]);
   useEffect(() => {
-    browser.runtime.onMessage.addListener(
-      (message: ExtMessage, sender, sendResponse) => {
-        console.log("notes:");
-        console.log(message);
-        if (message.messageType === MessageType.SELECT_TEXT) {
-          if (!username || !pathname || !tabUrl) return;
-          setNotes((prev) => {
-            const updatedNotes = [
-              {
-                body: message.data.selectionText,
-                tags: [{ id: "1", text: "selection" }],
-                highlightColor,
-                createdAt: Date.now(),
-                sort: prev.length + 1,
-              },
-              ...prev,
-            ];
-            void insertNotesToDb({
-              note: {
-                body: message.data.selectionText,
-                tags: [{ id: "1", text: "selection" }],
-                highlightColor,
-                sort: prev.length + 1,
-              },
-              pageId,
-            } as any);
-            void saveToBrowserStorage({
-              key: tabUrl + username + pathname,
-              value: updatedNotes,
-            });
-            return updatedNotes;
+    const handleMessage = (
+      message: ExtMessage,
+      sender: Runtime.MessageSender,
+      sendResponse: () => void
+    ) => {
+      console.log("notes:");
+      console.log(message);
+      if (message.messageType === MessageType.SELECT_TEXT) {
+        if (!username || !pathname || !tabUrl) return;
+        setNotes((prev) => {
+          const updatedNotes = [
+            {
+              body: message.data.selectionText,
+              tags: [{ id: "1", text: "selection" }],
+              highlightColor,
+              createdAt: Date.now(),
+              sort: prev.length + 1,
+            },
+            ...prev,
+          ];
+          void insertNotesToDb({
+            note: {
+              body: message.data.selectionText,
+              tags: [{ id: "1", text: "selection" }],
+              highlightColor,
+              sort: prev.length + 1,
+            },
+            pageId,
+          } as any);
+          void saveToBrowserStorage({
+            key: tabUrl + username + pathname,
+            value: updatedNotes,
           });
-        }
+          return updatedNotes;
+        });
       }
-    );
+    };
+    browser.runtime.onMessage.addListener(handleMessage);
+
+    return () => {
+      browser.runtime.onMessage.removeListener(handleMessage);
+    };
   }, []);
 
   return (

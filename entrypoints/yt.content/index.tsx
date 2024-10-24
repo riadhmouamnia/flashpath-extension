@@ -11,7 +11,7 @@ export default defineContentScript({
 
   async main(ctx) {
     const ui = await createShadowRootUi(ctx, {
-      name: "wxt-react-example",
+      name: "flashpath-extension",
       position: "inline",
       anchor: "body",
       append: "first",

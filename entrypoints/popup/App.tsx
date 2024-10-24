@@ -20,24 +20,31 @@ function HelloUser() {
   const { isSignedIn, user } = useUser();
   const clerk = useClerk();
 
-  async function sendMessageToBackground(isSignedIn: boolean | undefined) {
-    console.log("sending message to background");
-    if (isSignedIn === true && user) {
-      await browser.runtime.sendMessage({
-        messageType: MessageType.USER_LOGGED_IN,
-        data: user,
-      });
-    } else if (!isSignedIn || !user) {
-      await browser.runtime.sendMessage({
-        messageType: MessageType.USER_LOGGED_OUT,
-        data: null,
-      });
-    }
-  }
+  // async function sendMessageToBackground(isSignedIn: boolean | undefined) {
+  //   console.log("sending message to background");
+  //   if (isSignedIn === true && user) {
+  //     await browser.runtime.sendMessage({
+  //       messageType: MessageType.USER_LOGGED_IN,
+  //       data: user,
+  //     });
+  //   } else if (!isSignedIn || !user) {
+  //     await browser.runtime.sendMessage({
+  //       messageType: MessageType.USER_LOGGED_OUT,
+  //       data: null,
+  //     });
+  //   }
+  // }
 
   useEffect(() => {
     const unsubscribeCallback = clerk.addListener(async (resources) => {
       console.log("User signed in: ", resources.user);
+      // added this
+      if (resources.user) {
+        await browser.runtime.sendMessage({
+          messageType: MessageType.USER_LOGGED_IN,
+          data: user,
+        });
+      }
       await insertUserToDb({
         userId: resources.user?.id!,
         username: resources.user?.username!,
@@ -50,9 +57,9 @@ function HelloUser() {
     };
   }, []);
 
-  useEffect(() => {
-    sendMessageToBackground(isSignedIn);
-  }, [isSignedIn, user]);
+  // useEffect(() => {
+  //   sendMessageToBackground(isSignedIn);
+  // }, [isSignedIn, user]);
 
   if (!isSignedIn) {
     return null;
