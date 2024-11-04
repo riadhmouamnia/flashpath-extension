@@ -450,3 +450,52 @@ export function chunkSubstr(str: string, size: number) {
 
   return chunks;
 }
+
+// update path time utils
+export const startPathTimeTracking = async (pathId: number) => {
+  const startTime = Date.now();
+  await saveToBrowserStorage({
+    key: `pathStartTime-${pathId}`,
+    value: startTime,
+  });
+};
+
+export const stopPathTimeTracking = async (pathId: number) => {
+  const startTime = await loadFromBrowserStorage(`pathStartTime-${pathId}`);
+  if (startTime) {
+    const currentTime = Date.now();
+    const timeSpent = currentTime - startTime;
+    const storedTime =
+      (await loadFromBrowserStorage(`totalTimeSpent-${pathId}`)) || 0;
+    await saveToBrowserStorage({
+      key: `totalTimeSpent-${pathId}`,
+      value: storedTime + timeSpent,
+    });
+    await saveToBrowserStorage({ key: `pathStartTime-${pathId}`, value: null }); // Clear start time
+  }
+};
+
+export const getPathTotalTimeSpent = async (pathId: number) => {
+  const storedTime = await loadFromBrowserStorage(`totalTimeSpent-${pathId}`);
+  return storedTime || 0;
+};
+
+export const updatePathTimeOnDb = async (pathId: number) => {
+  const storedTime = await loadFromBrowserStorage(`totalTimeSpent-${pathId}`);
+  try {
+    if (!pathId) {
+      console.log("No pathId provided to update the path");
+      return;
+    }
+    const updatedPath = await db
+      .update(paths)
+      .set({
+        timeSpent: storedTime,
+      } as any)
+      .where(eq(paths.id, pathId))
+      .returning();
+    console.log("path updated: ", updatedPath[0]);
+  } catch (error) {
+    console.error("Error updating path", error);
+  }
+};

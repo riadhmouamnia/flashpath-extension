@@ -4,10 +4,14 @@ import ExtMessage, { DbPage, MessageType, Path } from "@/entrypoints/types";
 import Interactions from "@/components/interactions";
 import { useTheme } from "@/components/theme-provider";
 import {
+  getPathTotalTimeSpent,
   initializePage,
   insertPageToDb,
   loadFromBrowserStorage,
   setThemeToBody,
+  startPathTimeTracking,
+  stopPathTimeTracking,
+  updatePathTimeOnDb,
 } from "@/lib/utils";
 import YTNotes from "@/components/youtube/yt-notes";
 import Notes from "@/components/shared/notes";
@@ -24,6 +28,7 @@ export default () => {
   const [page, setPage] = useState<DbPage | null>(null);
   const { user } = useAuthContext();
   const [isPathOn, setIsPathOn] = useState<boolean>(false);
+  const [timeOnPath, setTimeOnPath] = useState<number>(0);
   useRRWEBRecorder({ pageId: page?.id, isPathOn });
 
   useEffect(() => {
@@ -104,9 +109,10 @@ export default () => {
   }, []);
 
   useEffect(() => {
-    if (!isPathOn) return;
+    if (!path || !path.id) return;
+
     const initPageOnDb = async () => {
-      if (!path) return;
+      if (!isPathOn) return;
       try {
         const insertedPage = await insertPageToDb({
           page: initializePage(url) as any,
@@ -120,7 +126,35 @@ export default () => {
       }
     };
 
+    const loadPathTime = async () => {
+      const timeOnPath = await getPathTotalTimeSpent(path.id);
+      setTimeOnPath(timeOnPath);
+      await updatePathTimeOnDb(path.id);
+    };
+
+    const trackTimeOnPath = async () => {
+      if (isPathOn) {
+        await startPathTimeTracking(path.id);
+      } else {
+        await stopPathTimeTracking(path.id);
+      }
+      loadPathTime();
+    };
+
+    const handleUnload = async () => {
+      if (isPathOn) {
+        await stopPathTimeTracking(path.id);
+      }
+    };
+
     initPageOnDb();
+    loadPathTime();
+    trackTimeOnPath();
+
+    window.addEventListener("beforeunload", handleUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload);
+    };
   }, [path, url, isPathOn]);
 
   if (!user) return;
@@ -131,7 +165,8 @@ export default () => {
       <CreatePathForm />
       {path ? (
         <p className="text-xs italic mt-1 text-primary/40">
-          You can now start recording for "{path.name}" path
+          You can now start recording for "{path.name}" path | Time on path:{" "}
+          {timeOnPath}
         </p>
       ) : (
         <p className="text-xs italic mt-1 text-red-400">

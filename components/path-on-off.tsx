@@ -1,11 +1,16 @@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
-import { loadFromBrowserStorage, saveToBrowserStorage } from "@/lib/utils";
+import {
+  loadFromBrowserStorage,
+  saveToBrowserStorage,
+  startPathTimeTracking,
+  stopPathTimeTracking,
+} from "@/lib/utils";
 import ExtMessage, { MessageType } from "@/entrypoints/types";
 import { Runtime } from "wxt/browser";
 
-export default function TurnPathOnOrOff() {
+export default function TurnPathOnOrOff({ pathId }: { pathId: number }) {
   const [isOn, setIsOn] = useState(false);
 
   useEffect(() => {
@@ -37,12 +42,14 @@ export default function TurnPathOnOrOff() {
   const handleToggle = async () => {
     setIsOn(!isOn);
     if (isOn) {
+      await stopPathTimeTracking(pathId);
       saveToBrowserStorage({ key: "isPathOn", value: false });
       await browser.runtime.sendMessage({
         messageType: MessageType.PATH_OFF,
         data: false,
       });
     } else {
+      await startPathTimeTracking(pathId);
       saveToBrowserStorage({ key: "isPathOn", value: true });
       await browser.runtime.sendMessage({
         messageType: MessageType.PATH_ON,

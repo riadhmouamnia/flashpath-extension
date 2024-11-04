@@ -25,7 +25,9 @@ export const paths = pgTable("paths", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id),
+  timeSpent: integer("time_spent").default(0),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const pages = pgTable(
