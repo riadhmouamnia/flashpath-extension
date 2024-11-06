@@ -26,19 +26,21 @@ CREATE TABLE IF NOT EXISTS "paths" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"user_id" text NOT NULL,
-	"created_at" timestamp DEFAULT now()
+	"time_spent" integer DEFAULT 0,
+	"created_at" timestamp DEFAULT now(),
+	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "rrweb_events" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"page_id" serial NOT NULL,
-	"event" json NOT NULL,
-	"created_at" timestamp DEFAULT now()
+	"event" json NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" varchar PRIMARY KEY NOT NULL,
 	"username" text NOT NULL,
+	"image_url" text,
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint

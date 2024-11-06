@@ -51,23 +51,23 @@ export const pages = pgTable(
   }
 );
 
-export const interactions = pgTable(
-  "interactions",
-  {
-    id: serial("id").primaryKey().notNull(),
-    pageId: serial("page_id")
-      .notNull()
-      .references(() => pages.id),
-    type: text("type").notNull(),
-    event: json("event").notNull(),
-    createdAt: timestamp("created_at").defaultNow(),
-  },
-  (table) => {
-    return {
-      pageIdIdx: index("interactions_page_id_idx").on(table.pageId),
-    };
-  }
-);
+// export const interactions = pgTable(
+//   "interactions",
+//   {
+//     id: serial("id").primaryKey().notNull(),
+//     pageId: serial("page_id")
+//       .notNull()
+//       .references(() => pages.id),
+//     type: text("type").notNull(),
+//     event: json("event").notNull(),
+//     createdAt: timestamp("created_at").defaultNow(),
+//   },
+//   (table) => {
+//     return {
+//       pageIdIdx: index("interactions_page_id_idx").on(table.pageId),
+//     };
+//   }
+// );
 
 export const notes = pgTable(
   "notes",
@@ -142,18 +142,18 @@ export const rrwebEvents = pgTable("rrweb_events", {
   event: json("event").notNull(),
 });
 
-export const rrwebEventsWithChunks = pgTable("rrweb_events_with_chunks", {
-  id: serial("id").primaryKey().notNull(),
-  pageId: serial("page_id")
-    .notNull()
-    .references(() => pages.id),
-  event: json("event"),
-  chunk: text("chunk"), // For storing chunked events (optional if not chunked)
-  chunkIndex: integer("chunk_index"), // Index of the chunk if it's part of a chunked snapshot
-  totalChunks: integer("total_chunks"), // Total number of chunks if the event is chunked
-  isChunked: boolean("is_chunked").default(false).notNull(), // Whether the event is chunked
-  createdAt: timestamp("created_at").defaultNow(),
-});
+// export const rrwebEventsWithChunks = pgTable("rrweb_events_with_chunks", {
+//   id: serial("id").primaryKey().notNull(),
+//   pageId: serial("page_id")
+//     .notNull()
+//     .references(() => pages.id),
+//   event: json("event"),
+//   chunk: text("chunk"), // For storing chunked events (optional if not chunked)
+//   chunkIndex: integer("chunk_index"), // Index of the chunk if it's part of a chunked snapshot
+//   totalChunks: integer("total_chunks"), // Total number of chunks if the event is chunked
+//   isChunked: boolean("is_chunked").default(false).notNull(), // Whether the event is chunked
+//   createdAt: timestamp("created_at").defaultNow(),
+// });
 
 export const rrwebEventsRelations = relations(rrwebEvents, ({ one }) => ({
   page: one(pages, {
