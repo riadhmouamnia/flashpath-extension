@@ -1,12 +1,11 @@
 import {
-  // interactions,
   paths,
   notes,
   users,
   pages,
   rrwebEvents,
-  rrwebEventsWithChunks,
-  interactions,
+  // rrwebEventsWithChunks,
+  // interactions,
 } from "./../server/db/schemas";
 import flashpathIcon from "/icon96.png";
 import { clsx, type ClassValue } from "clsx";
@@ -326,24 +325,24 @@ export async function updatePageOnDb({
   }
 }
 
-export async function insertInteractionsToDb({
-  interaction,
-  pageId,
-}: {
-  interaction: Interaction;
-  pageId: number;
-}) {
-  try {
-    const insertedInteractions = await db
-      .insert(interactions)
-      .values({ pageId, ...interaction })
-      .returning();
-    console.log("Interaction inserted", insertedInteractions[0]);
-    return insertedInteractions[0];
-  } catch (error) {
-    console.error("Error inserting interactions", error);
-  }
-}
+// export async function insertInteractionsToDb({
+//   interaction,
+//   pageId,
+// }: {
+//   interaction: Interaction;
+//   pageId: number;
+// }) {
+//   try {
+//     const insertedInteractions = await db
+//       .insert(interactions)
+//       .values({ pageId, ...interaction })
+//       .returning();
+//     console.log("Interaction inserted", insertedInteractions[0]);
+//     return insertedInteractions[0];
+//   } catch (error) {
+//     console.error("Error inserting interactions", error);
+//   }
+// }
 
 export async function insertNotesToDb({
   note,
@@ -398,58 +397,58 @@ export async function insertRrwebEventToDb({
   }
 }
 
-export async function insertRrwebChunksToDb({
-  events,
-  pageId,
-}: {
-  events: EventType[] | ChunckedEventType[];
-  pageId: number;
-}) {
-  try {
-    const insertedEvent = await db
-      .insert(rrwebEventsWithChunks)
-      .values(
-        events.map((event: any) => {
-          if ("isChunked" in event) {
-            // event is of type ChunckedEventType
-            return {
-              event: "CHUNK",
-              pageId,
-              chunkIndex: event.chunkIndex,
-              totalChunks: event.totalChunks,
-              isChunked: event.isChunked,
-              chunk: event.chunk,
-            };
-          } else {
-            // event is of type EventType
-            return {
-              pageId,
-              event,
-              isChunked: false,
-              chunk: null,
-              chunkIndex: null,
-              totalChunks: null,
-            };
-          }
-        })
-      )
-      .returning();
-    console.log("Event inserted", insertedEvent);
-  } catch (error) {
-    console.error("Error inserting event", error);
-  }
-}
+// export async function insertRrwebChunksToDb({
+//   events,
+//   pageId,
+// }: {
+//   events: EventType[] | ChunckedEventType[];
+//   pageId: number;
+// }) {
+//   try {
+//     const insertedEvent = await db
+//       .insert(rrwebEventsWithChunks)
+//       .values(
+//         events.map((event: any) => {
+//           if ("isChunked" in event) {
+//             // event is of type ChunckedEventType
+//             return {
+//               event: "CHUNK",
+//               pageId,
+//               chunkIndex: event.chunkIndex,
+//               totalChunks: event.totalChunks,
+//               isChunked: event.isChunked,
+//               chunk: event.chunk,
+//             };
+//           } else {
+//             // event is of type EventType
+//             return {
+//               pageId,
+//               event,
+//               isChunked: false,
+//               chunk: null,
+//               chunkIndex: null,
+//               totalChunks: null,
+//             };
+//           }
+//         })
+//       )
+//       .returning();
+//     console.log("Event inserted", insertedEvent);
+//   } catch (error) {
+//     console.error("Error inserting event", error);
+//   }
+// }
 
-export function chunkSubstr(str: string, size: number) {
-  const numChunks = Math.ceil(str.length / size);
-  const chunks = new Array(numChunks);
+// export function chunkSubstr(str: string, size: number) {
+//   const numChunks = Math.ceil(str.length / size);
+//   const chunks = new Array(numChunks);
 
-  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
-    chunks[i] = str.slice(o, o + size);
-  }
+//   for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+//     chunks[i] = str.slice(o, o + size);
+//   }
 
-  return chunks;
-}
+//   return chunks;
+// }
 
 // update path time utils
 export const startPathTimeTracking = async (pathId: number) => {
