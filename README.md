@@ -31,9 +31,33 @@ Download the latest build of the Flashpath extension from the link below:
 
 To install on Firefox, follow similar steps and use the Firefox-specific build commands below.
 
-## Development
+### Using the Extension in Development Mode
 
 Flashpath uses `wxt` to manage development and building for both Chrome and Firefox.
+Thanks to the `wxt` framework, you can run the Flashpath extension in development mode without manually loading and unpacking it in Chrome. Follow these steps:
+
+1. Clone the repository and install dependencies:
+   ```bash
+   npm install
+   # or
+   pnpm install
+   ```
+2. Start the extension in development mode:
+   **For Chrome**:
+
+   ```bash
+    npm run dev
+    # or
+    pnpm run dev
+   ```
+
+   **For Firefox**:
+
+   ```bash
+    npm run dev:firefox
+    # or
+    pnpm run dev:firefox
+   ```
 
 ### Available Commands
 
@@ -45,3 +69,31 @@ Flashpath uses `wxt` to manage development and building for both Chrome and Fire
 "zip": "wxt zip",
 "zip:firefox": "wxt zip -b firefox",
 ```
+
+### Setting Up the Database
+
+Before you build or test the extension, ensure that your database migrations are up to date. Follow these steps:
+
+1. **Generate the Migration**:
+   Run the following command to generate any necessary database migrations:
+
+   ```bash
+   npm run generate
+   # or
+   pnpm run generate
+   ```
+
+2. **Run the Migration**:
+   Apply the migrations to your database using the command:
+   ```bash
+   npm run migrate
+   # or
+   pnpm run migrate
+   ```
+
+By completing these steps, you ensure that the database schema is aligned with the extension's requirements.
+
+## Notes
+
+- Flashpath supports both Chrome and Firefox browsers.
+- Use the `dev` or `build` commands as appropriate for your target browser.
