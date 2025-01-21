@@ -43,6 +43,7 @@ Thanks to the `wxt` framework, you can run the Flashpath extension in developmen
    pnpm install
    ```
 2. Start the extension in development mode:
+
    **For Chrome**:
 
    ```bash
